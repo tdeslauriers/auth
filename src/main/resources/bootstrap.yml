@@ -1,0 +1,10 @@
+micronaut:
+  config-client:
+    enabled: true
+kubernetes:
+  client:
+    secrets:
+      enabled: true
+      includes: jdbc
+
+
