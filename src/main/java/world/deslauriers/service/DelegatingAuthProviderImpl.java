@@ -9,7 +9,6 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import world.deslauriers.model.database.User;
-import world.deslauriers.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,7 @@ public class DelegatingAuthProviderImpl implements AuthenticationProvider {
     @Inject
     private final PasswordEncoderService passwordEncoderService;
 
-    public DelegatingAuthProviderImpl(UserService userService, UserRepository userRepository, PasswordEncoderService passwordEncoderService) {
+    public DelegatingAuthProviderImpl(UserService userService, PasswordEncoderService passwordEncoderService) {
         this.userService = userService;
         this.passwordEncoderService = passwordEncoderService;
     }
