@@ -14,6 +14,9 @@ import world.deslauriers.repository.UserRoleRepository;
 import java.time.LocalDate;
 import java.util.HashSet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @MicronautTest
 public class UserServiceTest {
 
@@ -46,7 +49,9 @@ public class UserServiceTest {
         var ur1 = userRoleRepository.save(new UserRole(user, roleRepository.save(new Role(VALID_ROLE_1))));
         var ur2 = userRoleRepository.save(new UserRole(user, roleRepository.save(new Role(VALID_ROLE_2))));
 
-        user = userService.lookupUserByEmail(user.email()).get();
-        System.out.println(user);
+        user = userService.lookupUserByUsername(user.username()).get();
+        assertNotNull(user);
+        assertEquals(VALID_EMAIL, user.username());
+        assertEquals(2, user.userRoles().size());
     }
 }

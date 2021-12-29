@@ -3,14 +3,25 @@ micronaut:
     name: auth
   ssl:
     enabled: true
-    buildSelfSigned: true
+    build-self-signed: true
+  http:
+    client:
+      ssl:
+        enabled: true
+        build-self-signed: true
+  security:
+    authentication: bearer
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: ${JWT_GENERATOR_SIGNATURE_SECRET}
 datasources:
   default:
     url: ${JDBC_URL}
     username: ${JDBC_USERNAME}
     password: ${JDBC_PASSWORD}
-    driverClassName: ${JDBC_DRIVER}
-    schema-generate: CREATE_DROP
     dialect: ${JDBC_DIALECT}
 flyway:
   datasources:

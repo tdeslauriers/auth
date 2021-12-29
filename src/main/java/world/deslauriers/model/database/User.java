@@ -17,7 +17,7 @@ import java.util.Set;
 @MappedEntity
 public record User(
         @Id @GeneratedValue Long id,
-        @NotNull @NotBlank @Email @Size(max = 40) String email,
+        @NotNull @NotBlank @Email @Size(max = 40) String username,
         @NotNull @NotBlank String password,
         @DateCreated @NotNull LocalDate dateCreated,
         @NotNull Boolean enabled,
@@ -28,11 +28,11 @@ public record User(
         @JoinTable(name = "user_role")
         Set<UserRole> userRoles
 ) {
-        public User(String email, String password, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked) {
-                this(null, email, password, dateCreated, enabled, accountExpired, accountLocked, null);
+        public User(String username, String password, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked) {
+                this(null, username, password, dateCreated, enabled, accountExpired, accountLocked, null);
         }
 
-        public User(Long id, String email, String password, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked) {
-                this(id, email, password, dateCreated, enabled, accountExpired, accountLocked, null);
+        public User(Long id, String username, String password, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked) {
+                this(id, username, password, dateCreated, enabled, accountExpired, accountLocked, null);
         }
 }

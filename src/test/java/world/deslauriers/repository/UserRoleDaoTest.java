@@ -45,7 +45,7 @@ public class UserRoleDaoTest {
         assertEquals(role, ur.role());
 
         // test join
-        user = userRepository.findByEmail(user.email()).get();
+        user = userRepository.findByUsername(user.username()).get();
         assertNotNull(user);
         assertNotNull(user.userRoles());
         assertEquals(ur.id(), user.userRoles().stream().findFirst().get().id());

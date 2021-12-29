@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS user_role;
 
 CREATE TABLE user (
     id INT NOT NULL AUTO_INCREMENT,
-    email VARCHAR(40) NOT NULL,
+    username VARCHAR(40) NOT NULL,
     password VARCHAR(255) NOT NULL,
     date_created DATE NOT NULL,
     enabled BOOLEAN NOT NULL,

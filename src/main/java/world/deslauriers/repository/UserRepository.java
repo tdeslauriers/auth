@@ -13,5 +13,5 @@ public interface UserRepository extends PageableRepository<User, Long> {
 
     @Join(value = "userRoles", type = Join.Type.LEFT_FETCH)
     @Join(value = "userRoles.role", type = Join.Type.LEFT_FETCH)
-    Optional<User> findByEmail(String email);
+    Optional<User> findByUsername(String email);
 }
