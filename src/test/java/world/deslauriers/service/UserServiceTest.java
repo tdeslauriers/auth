@@ -37,6 +37,8 @@ public class UserServiceTest {
 
     private static final String VALID_EMAIL = "tom@deslauriers.world";
     private static final String VALID_CLEAR_PASSWORD = "Worst_password_ever!";
+    private static final String VALID_FIRST = "tom";
+    private static final String VALID_LAST = "deslauriers";
     private static final String VALID_ROLE_1 = "GALLERY_READ";
     private static final String VALID_ROLE_2 = "GALLERY_EDIT";
 
@@ -44,7 +46,7 @@ public class UserServiceTest {
     void testUserServiceMethods(){
 
         var user = userRepository.save(new User(
-                VALID_EMAIL, passwordEncoderService.encode(VALID_CLEAR_PASSWORD), LocalDate.now(), true, false, false));
+                VALID_EMAIL, passwordEncoderService.encode(VALID_CLEAR_PASSWORD), VALID_FIRST, VALID_LAST, LocalDate.now(), true, false, false));
 
         var ur1 = userRoleRepository.save(new UserRole(user, roleRepository.save(new Role(VALID_ROLE_1))));
         var ur2 = userRoleRepository.save(new UserRole(user, roleRepository.save(new Role(VALID_ROLE_2))));

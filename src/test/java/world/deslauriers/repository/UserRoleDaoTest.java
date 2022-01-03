@@ -27,6 +27,8 @@ public class UserRoleDaoTest {
 
     private static final String VALID_EMAIL = "tom@deslauriers.world";
     private static final String VALID_CLEAR_PASSWORD = "Worst_password_ever!";
+    private static final String VALID_FIRST = "tom";
+    private static final String VALID_LAST = "deslauriers";
     private static final String VALID_ROLE_1 = "GALLERY_READ";
     private static final String VALID_ROLE_2 = "GALLERY_EDIT";
 
@@ -37,7 +39,7 @@ public class UserRoleDaoTest {
         // db records must exist prior to association in xref
         var role = roleRepository.save(new Role(VALID_ROLE_1));
         var user = userRepository.save(new User(
-                VALID_EMAIL, VALID_CLEAR_PASSWORD, LocalDate.now(), true, false, false));
+                VALID_EMAIL, VALID_CLEAR_PASSWORD, VALID_FIRST, VALID_LAST, LocalDate.now(), true, false, false));
 
         var ur = userRoleRepository.save(new UserRole(user, role));
         assertNotNull(ur.id());

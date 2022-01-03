@@ -8,17 +8,15 @@ import io.micronaut.runtime.Micronaut;
     name = "auth",
     replicas = 3,
     envVars = {
-        @Env(name = "JDBC_URL", configmap = "jdbc-config", value = "config.url"),
-        @Env(name = "JDBC_DRIVER", configmap = "jdbc-config", value = "config.driver"),
-        @Env(name = "JDBC_DIALECT", configmap = "jdbc-config", value = "config.dialect"),
+        @Env(name = "JDBC_URL", configmap = "jdbc-config", value = "url"),
+        @Env(name = "JDBC_DRIVER", configmap = "jdbc-config", value = "driver"),
+        @Env(name = "JDBC_DIALECT", configmap = "jdbc-config", value = "dialect"),
         @Env(name = "JDBC_USERNAME", secret = "jdbc", value = "username"),
         @Env(name = "JDBC_PASSWORD", secret = "jdbc", value = "password"),
-        @Env(name = "JWT_GENERATOR_SIGNATURE_SECRET", secret = "jdbc", value = "signature-pw")},
+        @Env(name = "JWT_GENERATOR_SIGNATURE_SECRET", secret = "jwt", value = "signature-pw")},
     imagePullPolicy = ImagePullPolicy.Always,
     labels = @Label(key = "app", value = "auth"),
-    ports = @Port(name = "http", containerPort = 8443),
-    livenessProbe = @Probe(httpActionPath = "/health/liveness", initialDelaySeconds = 5, timeoutSeconds = 10, failureThreshold = 15),
-    readinessProbe = @Probe(httpActionPath = "/health/readiness", initialDelaySeconds = 5, timeoutSeconds = 10, failureThreshold = 15)
+    ports = @Port(name = "https", containerPort = 8443)
 )
 @DockerBuild(group = "tdeslauriers", name = "auth")
 public class Application {

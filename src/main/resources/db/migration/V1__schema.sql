@@ -4,8 +4,10 @@ DROP TABLE IF EXISTS user_role;
 
 CREATE TABLE user (
     id INT NOT NULL AUTO_INCREMENT,
-    username VARCHAR(40) NOT NULL,
+    username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
+    firstname, VARCHAR(64) NOT NULL,
+    lastname VARCHAR(64) NOT NULL,
     date_created DATE NOT NULL,
     enabled BOOLEAN NOT NULL,
     account_expired BOOLEAN NOT NULL,
@@ -15,7 +17,7 @@ CREATE TABLE user (
 
 CREATE TABLE role (
     id INT NOT NULL AUTO_INCREMENT,
-    role VARCHAR(40),
+    role VARCHAR(32),
     PRIMARY KEY (id)
 );
 
