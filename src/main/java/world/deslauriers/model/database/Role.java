@@ -16,7 +16,7 @@ import java.util.Set;
 @MappedEntity
 public record Role(
         @Id @GeneratedValue Long id,
-        @NotNull @NotBlank @Size(min = 2, max = 40) String role,
+        @NotNull @NotBlank @Size(min = 2, max = 32) String role,
 
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "role")
         @JoinTable(name = "user_role")
