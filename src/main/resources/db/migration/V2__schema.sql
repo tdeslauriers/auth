@@ -5,9 +5,9 @@ DROP TABLE IF EXISTS user_phone;
 
 CREATE TABLE address (
     id INT NOT NULL AUTO_INCREMENT,
-    address VARCHAR(128),
-    city VARCHAR(64),
-    state VARCHAR(64),
+    address VARCHAR(128) NOT NULL,
+    city VARCHAR(64) NOT NULL,
+    state VARCHAR(32) NOT NULL,
     zip VARCHAR(16),
     PRIMARY KEY (id)
 );
@@ -23,7 +23,7 @@ CREATE TABLE user_address (
 
 CREATE TABLE phone (
     id INT NOT NULL AUTO_INCREMENT,
-    phone INT (32),
+    phone INT (32) NOT NULL,
     PRIMARY KEY (id)
 );
 
