@@ -6,7 +6,7 @@ CREATE TABLE user (
     id INT NOT NULL AUTO_INCREMENT,
     username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    firstname, VARCHAR(32) NOT NULL,
+    firstname VARCHAR(32) NOT NULL,
     lastname VARCHAR(32) NOT NULL,
     date_created DATE NOT NULL,
     enabled BOOLEAN NOT NULL,
@@ -26,6 +26,6 @@ CREATE TABLE user_role (
     user_id INT NOT NULL,
     role_id INT NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES user (id),
+    CONSTRAINT fk_user_role_id FOREIGN KEY (user_id) REFERENCES user (id),
     CONSTRAINT fk_role_id FOREIGN KEY (role_id) REFERENCES role (id)
 );

@@ -22,4 +22,8 @@ public record UserRole(
         @Relation(Relation.Kind.MANY_TO_ONE)
         @JoinTable(name = "role")
         Role role
-) {}
+) {
+        public UserRole(@Nullable User user, @Nullable Role role) {
+                this(null, user, role);
+        }
+}

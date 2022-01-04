@@ -20,10 +20,10 @@ public class RoleDaoTest {
     @Test
     void testRoleCrud(){
 
-        var role = roleRepository.save(new Role("gallery_view"));
+        var role = roleRepository.save(new Role(null, "gallery_view", null));
         assertNotNull(role.id());
 
-        var updated = roleRepository.update(new Role(role.id(), "gallery_edit"));
+        var updated = roleRepository.update(new Role(role.id(), "gallery_edit", null));
         assertEquals(role.id(), updated.id());
         assertEquals("gallery_edit", updated.role());
         assertNull(updated.userRoles());

@@ -21,4 +21,12 @@ public record Role(
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "role")
         @JoinTable(name = "user_role")
         Set<UserRole> userRoles
-) {}
+) {
+        public Role(String role) {
+                this(null, role, null);
+        }
+
+        public Role(Long id, String role) {
+                this(id, role, null);
+        }
+}

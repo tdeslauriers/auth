@@ -22,4 +22,8 @@ public record UserAddress(
         @Relation(Relation.Kind.MANY_TO_ONE)
         @JoinTable(name = "address")
         Address address
-) {}
+) {
+        public UserAddress(@Nullable User user, @Nullable Address address) {
+                this(null, user, address);
+        }
+}

@@ -22,4 +22,8 @@ public record UserPhone(
         @Relation(Relation.Kind.MANY_TO_ONE)
         @JoinTable(name = "phone")
         Phone phone
-) {}
+) {
+        public UserPhone(@Nullable User user, @Nullable Phone phone) {
+                this(null, user, phone);
+        }
+}

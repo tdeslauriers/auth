@@ -20,4 +20,12 @@ public record Phone(
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "phone")
         @JoinTable(name = "user_phone")
         Set<UserPhone> userPhones
-) {}
+) {
+        public Phone(Integer phone) {
+                this(null, phone, null);
+        }
+
+        public Phone(Long id, Integer phone) {
+                this(id, phone, null);
+        }
+}

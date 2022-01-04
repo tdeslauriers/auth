@@ -103,8 +103,7 @@ public class AuthProviderTest {
     void testGoodCredsLogin(){
 
         // set up
-        var user = userRepository.save(new User(
-                VALID_EMAIL, passwordEncoderService.encode(VALID_CLEAR_PASSWORD),
+        var user = userRepository.save(new User(VALID_EMAIL, passwordEncoderService.encode(VALID_CLEAR_PASSWORD),
                 VALID_FIRST, VALID_LAST, LocalDate.now(), true, false, false));
 
         var ur1 = userRoleRepository.save(new UserRole(user, roleRepository.save(new Role(VALID_ROLE_1))));

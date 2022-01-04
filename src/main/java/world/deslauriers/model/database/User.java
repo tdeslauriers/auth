@@ -18,7 +18,7 @@ import java.util.Set;
 public record User(
         @Id @GeneratedValue Long id,
         @NonNull @NotBlank @Email @Size(max = 255) String username,
-        @NonNull @NotBlank String password,
+        @NonNull @NotBlank @Size(min = 12, max = 255) String password,
         @NonNull @NotBlank @Size(min = 1, max = 32)String firstname,
         @NonNull @NotBlank @Size(min = 1, max = 32)String lastname,
         @DateCreated @NotNull LocalDate dateCreated,
@@ -37,4 +37,12 @@ public record User(
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "user")
         @JoinTable(name = "user_phone")
         Set<UserPhone> userPhones
-) {}
+) {
+        public User(@NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked) {
+                this(null, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, null, null, null);
+        }
+
+        public User(Long id, @NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked) {
+                this(id, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, null, null, null);
+        }
+}

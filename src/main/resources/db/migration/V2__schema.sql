@@ -17,7 +17,7 @@ CREATE TABLE user_address (
     user_id INT NOT NULL,
     address_id INT NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES user (id),
+    CONSTRAINT fk_user_address_id FOREIGN KEY (user_id) REFERENCES user (id),
     CONSTRAINT fk_address_id FOREIGN KEY (address_id) REFERENCES address (id)
 );
 
@@ -32,6 +32,6 @@ CREATE TABLE user_phone (
     user_id INT NOT NULL,
     phone_id INT NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES user (id),
+    CONSTRAINT fk_user_phone_id FOREIGN KEY (user_id) REFERENCES user (id),
     CONSTRAINT fk_phone_id FOREIGN KEY (phone_id) REFERENCES phone (id)
 );
