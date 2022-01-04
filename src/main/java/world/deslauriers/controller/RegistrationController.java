@@ -63,7 +63,7 @@ public class RegistrationController {
         throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Registration failure.");
     }
 
-    @Post("username-available")
+    @Post("/user-available")
     public HttpResponse checkExistingUser(@Body @Valid ExistingUserDto existingUserDto)
         throws HttpStatusException{
 
