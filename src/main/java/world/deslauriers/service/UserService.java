@@ -1,8 +1,7 @@
 package world.deslauriers.service;
 
-import world.deslauriers.exceptions.UserRegistrationException;
-import world.deslauriers.model.registration.RegistrationDto;
 import world.deslauriers.model.database.User;
+import world.deslauriers.model.registration.RegistrationDto;
 
 import java.util.Optional;
 

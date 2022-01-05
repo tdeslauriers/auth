@@ -13,13 +13,12 @@ import io.micronaut.security.rules.SecurityRule;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import world.deslauriers.model.registration.ExistingUserDto;
-import world.deslauriers.model.registration.PasswordsMatchDto;
-import world.deslauriers.model.registration.RegistrationDto;
-import world.deslauriers.model.registration.ValidPasswordDto;
+import world.deslauriers.model.registration.*;
 import world.deslauriers.service.UserService;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @ExecuteOn(TaskExecutors.IO)
@@ -37,40 +36,44 @@ public class RegistrationController {
     }
 
     @Post
-    public HttpResponse register(@Body @Valid RegistrationDto registrationDto)
-            throws HttpStatusException {
+    public HttpResponse register(@Body @Valid RegistrationDto registrationDto){
 
         if (!registrationDto.password().equals(registrationDto.confirmPassword())){
-            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Passwords do not match.");
+            var err = new RegistrationResponseDto(400, "Bad Request", "Passwords do not match", "/register");
+            return HttpResponse.status(HttpStatus.BAD_REQUEST).body(err);
         }
 
         var existingUser = userService.lookupUserByUsername(registrationDto.username());
 
         if (existingUser.isPresent()){
-            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Username unavailable.");
+            log.warn("Attempt to create existing user, User ID: " + existingUser.get().id());
+            var err = new RegistrationResponseDto(400, "Bad Request", "Username Unavailable", "/register");
+            return HttpResponse.status(HttpStatus.BAD_REQUEST).body(err);
         }
 
         try {
             String message = userService.registerUser(registrationDto);
-            log.info(message);
 
-            // this should return the email uuid message for account verification
-            return HttpResponse.ok();
+            // this should return the message for account verification
+            var success = new RegistrationResponseDto(201, null, message, "/register");
+            return HttpResponse.status(HttpStatus.CREATED).body(success);
         } catch (Exception e){
-            log.error("Registration attempt failed: " + registrationDto.username(), e.getMessage());
+            log.error("Registration attempt failed.", e.getMessage());
         }
 
-        throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Registration failure.");
+        var err = new RegistrationResponseDto(400, "Bad Request", "Registration failed", "/register");
+        return HttpResponse.status(HttpStatus.BAD_REQUEST).body(err);
     }
 
     @Post("/user-available")
-    public HttpResponse checkExistingUser(@Body @Valid ExistingUserDto existingUserDto)
-        throws HttpStatusException{
+    public HttpResponse checkExistingUser(@Body @Valid ExistingUserDto existingUserDto){
 
-        if (userService.lookupUserByUsername(existingUserDto.username()).isPresent()) {
+        var existingUser = userService.lookupUserByUsername(existingUserDto.username());
 
-            log.warn("Attempt to register name already in system");
-            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Username unavailable.");
+        if (existingUser.isPresent()) {
+            log.warn("Attempt to create existing user, User ID: " + existingUser.get().id());
+            var err = new RegistrationResponseDto(400, "Bad Request", "Username Unavailable", "/register");
+            return HttpResponse.status(HttpStatus.BAD_REQUEST).body(err);
         }
         return HttpResponse.ok();
     }
@@ -83,11 +86,12 @@ public class RegistrationController {
     }
 
     @Post("/passwords-match")
-    public HttpResponse checkPasswordsMatch(@Body @Valid PasswordsMatchDto passwordsMatchDto)
-        throws HttpStatusException{
+    public HttpResponse checkPasswordsMatch(@Body @Valid PasswordsMatchDto passwordsMatchDto){
 
-        if (!passwordsMatchDto.password().equals(passwordsMatchDto.confirmPassword()))
-            throw new HttpStatusException(HttpStatus.BAD_REQUEST, "Passwords do not match.");
+        if (!passwordsMatchDto.password().equals(passwordsMatchDto.confirmPassword())) {
+            var err = new RegistrationResponseDto(400, "Bad Request", "Username Unavailable", "/register");
+            return HttpResponse.status(HttpStatus.BAD_REQUEST).body(err);
+        }
         return HttpResponse.ok();
     }
 

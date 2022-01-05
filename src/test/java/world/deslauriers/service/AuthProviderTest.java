@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import world.deslauriers.model.database.Role;
 import world.deslauriers.model.database.User;
 import world.deslauriers.model.database.UserRole;
+import world.deslauriers.model.registration.RegistrationDto;
 import world.deslauriers.repository.RoleRepository;
 import world.deslauriers.repository.UserRepository;
 import world.deslauriers.repository.UserRoleRepository;
@@ -40,8 +41,6 @@ public class AuthProviderTest {
     private static final String VALID_CLEAR_PASSWORD = "Worst_password_ever!";
     private static final String VALID_FIRST = "tom";
     private static final String VALID_LAST = "deslauriers";
-    private static final String VALID_ROLE_1 = "GALLERY_READ";
-    private static final String VALID_ROLE_2 = "GALLERY_EDIT";
 
     @Test
     void testNoCredsLogin(){
@@ -54,72 +53,36 @@ public class AuthProviderTest {
         });
     }
 
-    @Test
-    void testBadCredsLogin(){
-
-        // set up
-        var user = userRepository.save(new User(
-                VALID_EMAIL, passwordEncoderService.encode(VALID_CLEAR_PASSWORD),
-                VALID_FIRST, VALID_LAST, LocalDate.now(), true, false, false));
-
-        var ur1 = userRoleRepository.save(new UserRole(user, roleRepository.save(new Role(VALID_ROLE_1))));
-        var ur2 = userRoleRepository.save(new UserRole(user, roleRepository.save(new Role(VALID_ROLE_2))));
-
-        // bad password
-        HttpRequest request = HttpRequest
-                .create(HttpMethod.POST, "/login")
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .body(new UsernamePasswordCredentials(VALID_EMAIL, "bad_password"));
-
-        assertThrows(HttpClientResponseException.class, () -> {
-            client.toBlocking().exchange(request);
-        });
-        try {
-            var response = client.toBlocking().exchange(request);
-        } catch (HttpClientResponseException e){
-            assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
-            assertEquals("User Not Found", e.getMessage());
-        }
-
-        // user not in system
-        HttpRequest req2 = HttpRequest
-                .create(HttpMethod.POST, "/login")
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .body(new UsernamePasswordCredentials("not@here.com", "bad_password"));
-
-        assertThrows(HttpClientResponseException.class, () -> {
-            client.toBlocking().exchange(req2);
-        });
-
-        try {
-            var response = client.toBlocking().exchange(req2);
-        } catch (HttpClientResponseException e){
-            assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
-            assertEquals("User Not Found", e.getMessage());
-        }
-    }
 
     @Test
     void testGoodCredsLogin(){
 
-        // set up
-        var user = userRepository.save(new User(VALID_EMAIL, passwordEncoderService.encode(VALID_CLEAR_PASSWORD),
-                VALID_FIRST, VALID_LAST, LocalDate.now(), true, false, false));
+        // register user
+        var register = new RegistrationDto(
+                VALID_EMAIL, VALID_CLEAR_PASSWORD, VALID_CLEAR_PASSWORD, VALID_FIRST, VALID_LAST);
 
-        var ur1 = userRoleRepository.save(new UserRole(user, roleRepository.save(new Role(VALID_ROLE_1))));
-        var ur2 = userRoleRepository.save(new UserRole(user, roleRepository.save(new Role(VALID_ROLE_2))));
+        var request = HttpRequest.POST("/register", register);
+        var response = client.toBlocking().exchange(request);
 
         // good creds
-        HttpRequest request = HttpRequest
-                .create(HttpMethod.POST, "/login")
-                .accept(MediaType.APPLICATION_JSON)
-                .body(new UsernamePasswordCredentials(VALID_EMAIL, VALID_CLEAR_PASSWORD));
+        var loginReq = HttpRequest.POST("/login", new UsernamePasswordCredentials(VALID_EMAIL, VALID_CLEAR_PASSWORD));
 
-        HttpResponse<AccessRefreshToken> response = client
+        HttpResponse<AccessRefreshToken> loginResponse = client
                 .toBlocking()
-                .exchange(request, AccessRefreshToken.class);
-        assertEquals(200, response.status().getCode());
-        assertNotNull(response.body());
-        assertNotNull(response.body().getAccessToken());
+                .exchange(loginReq, AccessRefreshToken.class);
+        assertEquals(201, response.status().getCode());
+        assertNotNull(loginResponse.body());
+        assertNotNull(loginResponse.body().getAccessToken());
+        assertEquals("Bearer", loginResponse.body().getTokenType());
+
+        //bad creds
+        var badLoginReq = HttpRequest.POST("/login", new UsernamePasswordCredentials(VALID_EMAIL, "incorrect_password"));
+        var thrown = assertThrows(HttpClientResponseException.class, () -> {
+
+            client.toBlocking().exchange(badLoginReq, AccessRefreshToken.class);
+        });
+
+        assertEquals(HttpStatus.UNAUTHORIZED, thrown.getStatus());
+        assertEquals(401, thrown.getStatus().getCode());
     }
 }

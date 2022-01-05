@@ -9,6 +9,4 @@ import java.util.Optional;
 
 @JdbcRepository(dialect = Dialect.MYSQL)
 public interface RoleRepository extends PageableRepository<Role, Long> {
-
-    Optional<Role> findByRole(String role);
 }
