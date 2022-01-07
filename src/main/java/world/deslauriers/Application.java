@@ -6,6 +6,9 @@ import io.micronaut.runtime.Micronaut;
 
 @KubernetesApplication(
     name = "auth",
+    serviceType = ServiceType.NodePort,
+    expose = true,
+    host = "localhost",
     replicas = 3,
     envVars = {
         @Env(name = "JDBC_URL", configmap = "jdbc-config", value = "url"),

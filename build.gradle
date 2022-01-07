@@ -45,6 +45,8 @@ dependencies {
     // password encoding
     implementation("org.springframework.security:spring-security-crypto:$springSecCryptoVersion")
     implementation("commons-logging:commons-logging:1.2") // spring bcrypt source code impl uses apache commons LogFactory.
+    //password validation
+    implementation("org.passay:passay:$passayVersion")
 
     runtimeOnly("ch.qos.logback:logback-classic")
     runtimeOnly("mysql:mysql-connector-java")

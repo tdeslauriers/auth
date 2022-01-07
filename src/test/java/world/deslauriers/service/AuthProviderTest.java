@@ -6,39 +6,22 @@ import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.security.authentication.UsernamePasswordCredentials;
 import io.micronaut.security.token.jwt.render.AccessRefreshToken;
-import io.micronaut.security.token.jwt.validator.JwtTokenValidator;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
-import world.deslauriers.model.database.Role;
-import world.deslauriers.model.database.User;
-import world.deslauriers.model.database.UserRole;
 import world.deslauriers.model.registration.RegistrationDto;
-import world.deslauriers.repository.RoleRepository;
-import world.deslauriers.repository.UserRepository;
-import world.deslauriers.repository.UserRoleRepository;
-
-import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest
 public class AuthProviderTest {
 
-    @Inject private UserRepository userRepository;
-    @Inject private UserRoleRepository userRoleRepository;
-    @Inject private RoleRepository roleRepository;
-    @Inject private PasswordEncoderService passwordEncoderService;
-
     @Inject
     @Client("/")
     HttpClient client;
 
-    @Inject
-    JwtTokenValidator jwtTokenValidator;
-
     private static final String VALID_EMAIL = "tom@deslauriers.world";
-    private static final String VALID_CLEAR_PASSWORD = "Worst_password_ever!";
+    private static final String VALID_CLEAR_PASSWORD = "}Lk?!+MT1L&B'PTM8gRZ";
     private static final String VALID_FIRST = "tom";
     private static final String VALID_LAST = "deslauriers";
 

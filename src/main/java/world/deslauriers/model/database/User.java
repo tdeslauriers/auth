@@ -18,7 +18,7 @@ import java.util.Set;
 public record User(
         @Id @GeneratedValue Long id,
         @NonNull @NotBlank @Email @Size(max = 255) String username,
-        @NonNull @NotBlank @Size(min = 12, max = 255) String password,
+        @NonNull @NotBlank String password,
         @NonNull @NotBlank @Size(min = 1, max = 32)String firstname,
         @NonNull @NotBlank @Size(min = 1, max = 32)String lastname,
         @DateCreated @NotNull LocalDate dateCreated,

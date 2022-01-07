@@ -23,7 +23,7 @@ public class RegistrationControllerTest {
     HttpClient client;
 
     private static final String VALID_EMAIL = "tom@deslauriers.world";
-    private static final String VALID_CLEAR_PASSWORD = "Worst_password_ever!";
+    private static final String VALID_CLEAR_PASSWORD = "Qe`&3~Z+pbdI;*Faja.2";
     private static final String VALID_FIRST = "tom";
     private static final String VALID_LAST = "deslauriers";
 
@@ -42,7 +42,7 @@ public class RegistrationControllerTest {
         // passwords don't match
         // email is same, but pw error should trigger first.
         var dontMatch = new RegistrationDto(
-                VALID_EMAIL, VALID_CLEAR_PASSWORD, "does_not_match", VALID_FIRST, VALID_LAST);
+                VALID_EMAIL, VALID_CLEAR_PASSWORD, "2nd_Worst_password_ever", VALID_FIRST, VALID_LAST);
         var thrown = assertThrows(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(HttpRequest.POST("/register", dontMatch));
         });
