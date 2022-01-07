@@ -32,7 +32,7 @@ public class PasswordValidationTest {
                 "has space",
                 "has    tab",
                 "no_upper_case",
-                "no_lower_case",
+                "NO_LOWER_CASE",
                 "no_numbers",
                 "no characters",
                 "abcd",
