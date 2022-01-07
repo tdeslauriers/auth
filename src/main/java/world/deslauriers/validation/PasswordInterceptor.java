@@ -44,7 +44,7 @@ public class PasswordInterceptor implements ConstraintValidator<PasswordComplexi
                 new CharacterRule(EnglishCharacterData.Special, 1),
                 new IllegalSequenceRule(EnglishSequenceData.Alphabetical, 4, false),
                 new IllegalSequenceRule(EnglishSequenceData.Numerical, 3, false),
-                new IllegalSequenceRule(EnglishSequenceData.USQwerty, 3, false),
+                new IllegalSequenceRule(EnglishSequenceData.USQwerty, 4, false),
                 new RepeatCharactersRule( 3)
         ));
         PasswordValidator validator = new PasswordValidator(resolver, rules);

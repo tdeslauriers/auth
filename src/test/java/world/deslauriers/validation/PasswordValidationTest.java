@@ -37,7 +37,7 @@ public class PasswordValidationTest {
                 "no characters",
                 "abcd",
                 "123",
-                "hjk", // qwerty
+                "hjkl", // qwerty
                 "AAA repeat chars"
         ));
 
