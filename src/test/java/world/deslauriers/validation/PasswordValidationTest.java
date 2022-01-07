@@ -37,8 +37,8 @@ public class PasswordValidationTest {
                 "no characters",
                 "abcd",
                 "123",
-                "hjk",
-                "AAA"
+                "hjk", // qwerty
+                "AAA repeat chars"
         ));
 
         bad_passwords.forEach(password -> {
