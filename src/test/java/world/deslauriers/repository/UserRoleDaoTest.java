@@ -26,7 +26,7 @@ public class UserRoleDaoTest {
     private UserRoleRepository userRoleRepository;
 
     private static final String VALID_EMAIL = "tom@deslauriers.world";
-    private static final String VALID_CLEAR_PASSWORD = "Worst_password_ever!";
+    private static final String VALID_CLEAR_PASSWORD = "3rd_Worst_password_ever!";
     private static final String VALID_FIRST = "tom";
     private static final String VALID_LAST = "deslauriers";
     private static final String VALID_ROLE_1 = "GALLERY_READ";

@@ -17,7 +17,7 @@ public class UserDaoTest {
     private UserRepository userRepository;
 
     private static final String VALID_EMAIL = "tom@deslauriers.world";
-    private static final String VALID_CLEAR_PASSWORD = "Worst_password_ever!";
+    private static final String VALID_CLEAR_PASSWORD = "2nd_Worst_password_ever!";
     private static final String VALID_FIRST = "tom";
     private static final String VALID_LAST = "deslauriers";
 
@@ -32,11 +32,11 @@ public class UserDaoTest {
         user = userRepository.save(user);
         assertNotNull(user.id());
 
-        user = new User(user.id(), VALID_EMAIL, "new_password", VALID_FIRST, VALID_LAST, dateCreated, true, false, false);
+        user = new User(user.id(), VALID_EMAIL, "This_1_is_bad_2!", VALID_FIRST, VALID_LAST, dateCreated, true, false, false);
         var checkId = user.id();
         user = userRepository.update(user);
         assertNotNull(user.id());
         assertEquals(checkId, user.id());
-        assertEquals("new_password", user.password());
+        assertEquals("This_1_is_bad_2!", user.password());
     }
 }

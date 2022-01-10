@@ -49,7 +49,6 @@ public class PasswordValidationTest {
             assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
         });
 
-
         var good_password = "b:xrq!=1vZXm\\n*(mg~f";
         var response = client
                 .toBlocking()
