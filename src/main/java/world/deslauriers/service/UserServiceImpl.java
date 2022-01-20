@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import world.deslauriers.model.profile.ProfileDto;
 import world.deslauriers.model.registration.RegistrationDto;
 import world.deslauriers.model.database.User;
 import world.deslauriers.repository.UserRepository;
@@ -51,5 +52,24 @@ public class UserServiceImpl implements UserService{
         message.append("Registration successful"); // placeholder for email verification service.
 
         return message.toString();
+    }
+
+    @Override
+    public Optional<ProfileDto> getProfile(String username){
+
+        // user is present because came from jwt, login is user check
+        var user = lookupUserByUsername(username);
+        if (user.isPresent()){
+
+            return Optional.of(new ProfileDto(
+                    user.get().username(),
+                    user.get().firstname(),
+                    user.get().lastname(),
+                    user.get().userAddresses(),
+                    user.get().userPhones()
+            ));
+        } else {
+            return null;
+        }
     }
 }

@@ -20,18 +20,18 @@ public record Address(
         @NonNull @NotBlank @Size(max = 128) String address,
         @NonNull @NotBlank @Size(max = 64) String city,
         @NonNull @NotBlank @Size(max = 32) String state,
-        @NotNull @NotBlank @Size(min = 5, max = 16) Integer zip,
+        @NotNull @NotBlank @Size(min = 5, max = 10) String zip,
 
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "address")
         @JoinTable(name = "user_address")
         Set<UserAddress> userAddresses
 
 ) {
-        public Address(@NonNull String address, @NonNull String city, @NonNull String state, Integer zip) {
+        public Address(@NonNull String address, @NonNull String city, @NonNull String state, String zip) {
                 this(null, address, city, state, zip, null);
         }
 
-        public Address(Long id, @NonNull String address, @NonNull String city, @NonNull String state, Integer zip) {
+        public Address(Long id, @NonNull String address, @NonNull String city, @NonNull String state, String zip) {
                 this(id, address, city, state, zip, null);
         }
 }

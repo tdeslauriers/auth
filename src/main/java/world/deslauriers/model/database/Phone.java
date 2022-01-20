@@ -15,17 +15,17 @@ import java.util.Set;
 @MappedEntity
 public record Phone(
         @Id @GeneratedValue Long id,
-        @NotNull @Size(min = 9, max = 32) Integer phone,
+        @NotNull @Size(min = 9, max = 32) String phone,
 
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "phone")
         @JoinTable(name = "user_phone")
         Set<UserPhone> userPhones
 ) {
-        public Phone(Integer phone) {
+        public Phone(String phone) {
                 this(null, phone, null);
         }
 
-        public Phone(Long id, Integer phone) {
+        public Phone(Long id, String phone) {
                 this(id, phone, null);
         }
 }

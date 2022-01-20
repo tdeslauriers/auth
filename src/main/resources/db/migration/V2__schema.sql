@@ -23,7 +23,7 @@ CREATE TABLE user_address (
 
 CREATE TABLE phone (
     id INT NOT NULL AUTO_INCREMENT,
-    phone INT (32) NOT NULL,
+    phone VARCHAR(32) NOT NULL,
     PRIMARY KEY (id)
 );
 
