@@ -4,12 +4,15 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import world.deslauriers.model.database.Address;
+import world.deslauriers.model.database.Phone;
 import world.deslauriers.model.profile.ProfileDto;
 import world.deslauriers.model.registration.RegistrationDto;
 import world.deslauriers.model.database.User;
 import world.deslauriers.repository.UserRepository;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Optional;
 
 @Singleton
@@ -61,12 +64,36 @@ public class UserServiceImpl implements UserService{
         var user = lookupUserByUsername(username);
         if (user.isPresent()){
 
+            HashSet<Address> addresses = new HashSet<>();
+            if (user.get().userAddresses() != null){
+
+                user.get().userAddresses().forEach(userAddress -> {
+                    var address = new Address(
+                            userAddress.address().id(),
+                            userAddress.address().address(),
+                            userAddress.address().city(),
+                            userAddress.address().state(),
+                            userAddress.address().zip()
+                    );
+                    addresses.add(address);
+                });
+            }
+
+            HashSet<Phone> phones = new HashSet<>();
+            if (user.get().userPhones() != null){
+
+                user.get().userPhones().forEach(userPhone -> {
+                    var phone = new Phone(userPhone.phone().id(), userPhone.phone().phone());
+                    phones.add(phone);
+                });
+            }
+
             return Optional.of(new ProfileDto(
                     user.get().username(),
                     user.get().firstname(),
                     user.get().lastname(),
-                    user.get().userAddresses(),
-                    user.get().userPhones()
+                    addresses,
+                    phones
             ));
         } else {
             return null;
