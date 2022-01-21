@@ -41,10 +41,8 @@ public class RegistrationController {
             return HttpResponse.status(HttpStatus.BAD_REQUEST).body(err);
         }
 
-        var existingUser = userService.lookupUserByUsername(registrationDto.username());
-
-        if (existingUser.isPresent()){
-            log.warn("Attempt to create existing user, User ID: " + existingUser.get().id());
+        if (userService.userExists(registrationDto.username())) {
+            log.warn("Attempt to create existing user: " + registrationDto.username().substring(0,10));
             var err = new RegistrationResponseDto(400, "Bad Request", "Username Unavailable", "/register");
             return HttpResponse.status(HttpStatus.BAD_REQUEST).body(err);
         }
@@ -66,10 +64,8 @@ public class RegistrationController {
     @Post("/user-available")
     public HttpResponse checkExistingUser(@Body @Valid ExistingUserDto existingUserDto){
 
-        var existingUser = userService.lookupUserByUsername(existingUserDto.username());
-
-        if (existingUser.isPresent()) {
-            log.warn("Attempt to create existing user, User ID: " + existingUser.get().id());
+        if (userService.userExists(existingUserDto.username())) {
+            log.warn("Attempt to create existing user: " + existingUserDto.username().substring(0,10));
             var err = new RegistrationResponseDto(400, "Bad Request", "Username Unavailable", "/register");
             return HttpResponse.status(HttpStatus.BAD_REQUEST).body(err);
         }

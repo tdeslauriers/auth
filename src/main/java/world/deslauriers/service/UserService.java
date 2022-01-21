@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface UserService {
 
+    Boolean userExists(String email);
+
     Optional<User> lookupUserByUsername(String email);
 
     String registerUser(RegistrationDto registrationDto);

@@ -9,8 +9,7 @@ import world.deslauriers.model.database.UserPhone;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest
 public class UserDaoTest {
@@ -52,6 +51,17 @@ public class UserDaoTest {
         assertEquals(1, user.userPhones().size());
         var phone = user.userPhones().stream().findFirst().get().phone().phone();
         assertEquals("6665554444", phone);
+
+        // existing user
+        var username = userRepository.findUsername(VALID_EMAIL);
+        assertEquals(VALID_EMAIL, username.get());
+        assertTrue(username.isPresent());
+        assertFalse(username.isEmpty());
+
+        // doesnt exist in db
+        var notuser = userRepository.findUsername("doesnt@exist.com");
+        assertTrue(notuser.isEmpty());
+        assertFalse(notuser.isPresent());
     }
 }
 
