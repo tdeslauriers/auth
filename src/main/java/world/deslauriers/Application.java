@@ -14,6 +14,8 @@ import io.micronaut.runtime.Micronaut;
         @Env(name = "JDBC_URL", configmap = "jdbc-config", value = "url"),
         @Env(name = "JDBC_DRIVER", configmap = "jdbc-config", value = "driver"),
         @Env(name = "JDBC_DIALECT", configmap = "jdbc-config", value = "dialect"),
+        @Env(name = "CORS_URL", configmap = "cors-config", value = "url"),
+        @Env(name = "CORS_URL_1", configmap = "cors-config", value = "url_1"),
         @Env(name = "JDBC_USERNAME", secret = "jdbc", value = "username"),
         @Env(name = "JDBC_PASSWORD", secret = "jdbc", value = "password"),
         @Env(name = "JWT_GENERATOR_SIGNATURE_SECRET", secret = "jwt", value = "signature-pw")},

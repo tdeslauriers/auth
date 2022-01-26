@@ -1,6 +1,14 @@
 micronaut:
   application:
     name: auth
+  server:
+    cors:
+      enabled: true
+      configurations:
+        web:
+          allowedOrigins:
+            - ${CORS_URL}
+            - ${CORS_URL_1}
   ssl:
     enabled: true
     build-self-signed: true
