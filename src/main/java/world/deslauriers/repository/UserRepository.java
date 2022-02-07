@@ -7,6 +7,7 @@ import io.micronaut.data.jdbc.annotation.JdbcRepository;
 import io.micronaut.data.model.query.builder.sql.Dialect;
 import io.micronaut.data.repository.PageableRepository;
 import world.deslauriers.model.database.User;
+import world.deslauriers.model.profile.UserDto;
 
 import java.util.Optional;
 
@@ -23,4 +24,7 @@ public interface UserRepository extends PageableRepository<User, Long> {
 
     @Query("SELECT username FROM user u WHERE username = :email")
     Optional<String> findUsername(String email);
+
+    @Query("SELECT id, username, firstname, lastname, date_created, enabled, account_expired, account_locked FROM user")
+    Iterable<UserDto> findAllUsers();
 }

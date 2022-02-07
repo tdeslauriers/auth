@@ -11,6 +11,7 @@ import reactor.core.publisher.FluxSink;
 import world.deslauriers.model.database.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,6 +91,10 @@ public class DelegatingAuthProviderImpl implements AuthenticationProvider {
             authorities.add(userRole.role().role());
         });
 
-        return AuthenticationResponse.success(user.username(), authorities);
+        var attributes = new HashMap<String, Object>();
+        attributes.put("firstname", user.firstname());
+        attributes.put("lastname", user.lastname());
+
+        return AuthenticationResponse.success(user.username(), authorities, attributes);
     }
 }

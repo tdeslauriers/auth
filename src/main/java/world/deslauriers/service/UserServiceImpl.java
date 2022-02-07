@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import world.deslauriers.model.database.Address;
 import world.deslauriers.model.database.Phone;
 import world.deslauriers.model.profile.ProfileDto;
+import world.deslauriers.model.profile.UserDto;
 import world.deslauriers.model.registration.RegistrationDto;
 import world.deslauriers.model.database.User;
 import world.deslauriers.repository.UserRepository;
@@ -41,6 +42,12 @@ public class UserServiceImpl implements UserService{
     public Optional<User> lookupUserByUsername(String email) {
 
         return userRepository.findByUsername(email);
+    }
+
+    @Override
+    public Iterable<UserDto> getAllUsers(){
+
+        return userRepository.findAllUsers();
     }
 
     @Override

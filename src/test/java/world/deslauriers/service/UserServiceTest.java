@@ -55,5 +55,9 @@ public class UserServiceTest {
         assertNotNull(user);
         assertEquals(VALID_EMAIL, user.username());
         assertEquals(2, user.userRoles().size());
+
+        var all = userRepository.findAllUsers();
+        all.forEach(System.out::println);
     }
+
 }
