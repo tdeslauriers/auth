@@ -8,13 +8,14 @@ import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import jakarta.inject.Inject;
 import world.deslauriers.model.profile.ProfileDto;
+import world.deslauriers.model.profile.UserDto;
 import world.deslauriers.service.UserService;
 
 import java.security.Principal;
 
 @ExecuteOn(TaskExecutors.IO)
 @Secured(SecurityRule.IS_AUTHENTICATED)
-@Controller("/profile")
+@Controller("/profiles")
 public class ProfileController {
 
     @Inject
@@ -28,5 +29,12 @@ public class ProfileController {
     public ProfileDto getprofile(Principal principal){
 
         return userService.getProfile(principal.getName()).orElse(null);
+    }
+
+    @Secured({"PROFILE_ADMIN"})
+    @Get("/all")
+    public Iterable<UserDto> getAll(){
+
+        return userService.getAllUsers();
     }
 }
