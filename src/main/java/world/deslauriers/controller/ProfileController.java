@@ -25,12 +25,14 @@ public class ProfileController {
         this.userService = userService;
     }
 
+    // users
     @Get("/user")
     public ProfileDto getprofile(Principal principal){
 
         return userService.getProfile(principal.getName()).orElse(null);
     }
 
+    // admin
     @Secured({"PROFILE_ADMIN"})
     @Get("/all")
     public Iterable<UserDto> getAll(){

@@ -6,11 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import world.deslauriers.model.database.Address;
 import world.deslauriers.model.database.Phone;
+import world.deslauriers.model.database.UserRole;
 import world.deslauriers.model.profile.ProfileDto;
 import world.deslauriers.model.profile.UserDto;
 import world.deslauriers.model.registration.RegistrationDto;
 import world.deslauriers.model.database.User;
 import world.deslauriers.repository.UserRepository;
+import world.deslauriers.repository.UserRoleRepository;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -25,10 +27,19 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
 
     @Inject
+    private final UserRoleRepository userRoleRepository;
+
+    @Inject
+    private final RoleService roleService;
+
+
+    @Inject
     private final PasswordEncoderService passwordEncoderService;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoderService passwordEncoderService) {
+    public UserServiceImpl(UserRepository userRepository, UserRoleRepository userRoleRepository, RoleService roleService, PasswordEncoderService passwordEncoderService) {
         this.userRepository = userRepository;
+        this.userRoleRepository = userRoleRepository;
+        this.roleService = roleService;
         this.passwordEncoderService = passwordEncoderService;
     }
 
@@ -65,6 +76,9 @@ public class UserServiceImpl implements UserService{
                 false);
         user = userRepository.save(user);
         log.info("Registration successful; User ID: " + user.id().toString());
+
+        // add default role/scope
+        userRoleRepository.save(new UserRole(user, roleService.getRole("GENERAL_ADMISSION").get()));
         message.append("Registration successful"); // placeholder for email verification service.
 
         return message.toString();
