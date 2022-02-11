@@ -79,6 +79,7 @@ public class UserServiceImpl implements UserService{
 
         // add default role/scope
         userRoleRepository.save(new UserRole(user, roleService.getRole("GENERAL_ADMISSION").get()));
+        log.info("User ID: " + user.id() + " granted scope: GENERAL_ADMISSION.");
         message.append("Registration successful"); // placeholder for email verification service.
 
         return message.toString();

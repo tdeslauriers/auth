@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 import world.deslauriers.model.database.Role;
 import world.deslauriers.model.database.User;
 import world.deslauriers.model.database.UserRole;
+import world.deslauriers.service.RoleService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @MicronautTest
 public class UserRoleDaoTest {
@@ -20,7 +20,7 @@ public class UserRoleDaoTest {
     private UserRepository userRepository;
 
     @Inject
-    private RoleRepository roleRepository;
+    private RoleService roleService;
 
     @Inject
     private UserRoleRepository userRoleRepository;
@@ -37,7 +37,7 @@ public class UserRoleDaoTest {
     void testUserRoleCrud(){
 
         // db records must exist prior to association in xref
-        var role = roleRepository.save(new Role(VALID_ROLE_1));
+        var role = roleService.save(new Role(VALID_ROLE_1));
         var user = userRepository.save(new User(
                 VALID_EMAIL, VALID_CLEAR_PASSWORD, VALID_FIRST, VALID_LAST, LocalDate.now(), true, false, false));
 
@@ -55,8 +55,13 @@ public class UserRoleDaoTest {
         assertEquals(VALID_ROLE_1, user.userRoles().stream().findFirst().get().role().role());
 
         // test add xref join via user record update
-        var ur2 = new UserRole(user, roleRepository.save(new Role(VALID_ROLE_2)));
+        var ur2 = new UserRole(user, roleService.save(new Role(VALID_ROLE_2)));
         ur2 = userRoleRepository.save(ur2);
+
+        // id present, but user and roles null???
         var userroles = userRoleRepository.findAll();
+
+
+
     }
 }

@@ -8,4 +8,6 @@ public interface RoleService {
 
 
     Optional<Role> getRole(String role);
+
+    Role save(Role role);
 }

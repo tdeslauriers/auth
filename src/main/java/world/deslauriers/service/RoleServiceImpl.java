@@ -22,4 +22,11 @@ public class RoleServiceImpl implements RoleService {
 
         return roleRepository.findByRole(role);
     }
+
+    @Override
+    public Role save(Role role){
+
+        // placeholder for input validation
+        return roleRepository.save(role);
+    }
 }
