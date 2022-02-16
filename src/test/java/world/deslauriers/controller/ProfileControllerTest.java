@@ -92,20 +92,22 @@ public class ProfileControllerTest {
         var updated = client.toBlocking().exchange(adminUpdateReq);
         assertEquals(HttpStatus.NO_CONTENT, updated.getStatus());
 
-        var jndi= HttpRequest.PUT("/profiles/edit", new ProfileDto(
+        // for fun: using logback not log4j2
+        var jndi = HttpRequest.PUT("/profiles/edit", new ProfileDto(
                 profile.id(),
                 "${jndi:ldap//deslauriers.world/evil}@nope.com",
-                profile.firstname(),
-                profile.lastname(),
+                "${jndi:ldap//deslauriers.world/evil}",
+                "jndi:ldap//deslauriers.world/evil",
                 profile.dateCreated(),
                 profile.enabled(),
                 profile.accountExpired(),
                 profile.accountLocked(),
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
-        assertThrows(HttpClientResponseException.class, () -> {
+        thrown = assertThrows(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(jndi);
         });
+        assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
     }
 
 
