@@ -18,4 +18,6 @@ public interface UserService {
     String registerUser(RegistrationDto registrationDto);
 
     Optional<ProfileDto> getProfile(String username);
+
+    void updateUser(ProfileDto updatedProfile);
 }

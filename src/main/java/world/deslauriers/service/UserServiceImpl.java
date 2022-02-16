@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService{
                 false,
                 false);
         user = userRepository.save(user);
-        log.info("Registration successful; User ID: " + user.id().toString());
+        log.info("User Registration successful; ID: " + user.id().toString() + " - Username: " + user.username());
 
         // add default role/scope
         userRoleRepository.save(new UserRole(user, roleService.getRole("GENERAL_ADMISSION").get()));
@@ -117,14 +117,84 @@ public class UserServiceImpl implements UserService{
             }
 
             return Optional.of(new ProfileDto(
+                    user.get().id(),
                     user.get().username(),
                     user.get().firstname(),
                     user.get().lastname(),
+                    user.get().dateCreated(),
+                    user.get().enabled(),
+                    user.get().accountExpired(),
+                    user.get().accountLocked(),
                     addresses,
                     phones
             ));
         } else {
             return null;
+        }
+    }
+
+    @Override
+    public void updateUser(ProfileDto updatedProfile) {
+
+        var sb = new StringBuilder();
+        HashSet<Address> addresses = new HashSet<>();
+        HashSet<Phone> phones = new HashSet<>();
+
+        var user = userRepository.findById(updatedProfile.id());
+
+        if (user.isEmpty()){
+            log.error("User Id: " + updatedProfile.id() + " - does not exist.");
+        }
+
+        if (user.isPresent()){
+            try {
+                // logging is placeholder for updating user field history table
+                // update username
+                if (!updatedProfile.username().equals(user.get().username())){
+                    sb.append(user.get().username()).append(" --> ").append(updatedProfile.username()).append("\n");
+                }
+
+                // update firstname
+                if (!updatedProfile.firstname().equals(user.get().firstname())){
+                    sb.append(user.get().firstname()).append(" --> ").append(updatedProfile.firstname()).append("\n");
+                }
+
+                // update lastname
+                if (!updatedProfile.lastname().equals(user.get().lastname())){
+                    sb.append(user.get().lastname()).append(" --> ").append(updatedProfile.lastname()).append("\n");
+                }
+
+                // enabled?
+                if (!updatedProfile.enabled().equals(user.get().enabled())){
+                    sb.append("Enabled: ").append(user.get().enabled()).append(" --> ").append(updatedProfile.enabled()).append("\n");
+                }
+
+                // account expired?
+                if (!updatedProfile.accountExpired().equals(user.get().accountExpired())){
+                    sb.append("Account expired: ").append(user.get().accountExpired()).append(" --> ").append(updatedProfile.accountExpired()).append("\n");
+                }
+
+                // account locked?
+                if (!updatedProfile.accountLocked().equals(user.get().accountLocked())){
+                    sb.append("Account locked: ").append(user.get().accountLocked()).append(" --> ").append(updatedProfile.accountLocked()).append("\n");
+                }
+
+                var updated = userRepository.update(new User(
+                        user.get().id(),
+                        updatedProfile.username(),
+                        user.get().password(),
+                        updatedProfile.firstname(),
+                        updatedProfile.lastname(),
+                        user.get().dateCreated(),
+                        updatedProfile.enabled(),
+                        updatedProfile.accountExpired(),
+                        updatedProfile.accountLocked()));
+
+                if (sb.length() > 0) log.info("\nUpdated UserID " + user.get().id() + ":\n" + sb.toString());
+
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
         }
     }
 }
