@@ -62,6 +62,8 @@ public class UserDaoTest {
         var notuser = userRepository.findUsername("doesnt@exist.com");
         assertTrue(notuser.isEmpty());
         assertFalse(notuser.isPresent());
+
+
     }
 }
 

@@ -32,14 +32,17 @@ public class UserServiceImpl implements UserService{
     @Inject
     private final RoleService roleService;
 
+    @Inject
+    private final AddressService addressService;
 
     @Inject
     private final PasswordEncoderService passwordEncoderService;
 
-    public UserServiceImpl(UserRepository userRepository, UserRoleRepository userRoleRepository, RoleService roleService, PasswordEncoderService passwordEncoderService) {
+    public UserServiceImpl(UserRepository userRepository, UserRoleRepository userRoleRepository, RoleService roleService, AddressService addressService, PasswordEncoderService passwordEncoderService) {
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
         this.roleService = roleService;
+        this.addressService = addressService;
         this.passwordEncoderService = passwordEncoderService;
     }
 
@@ -179,18 +182,23 @@ public class UserServiceImpl implements UserService{
                     sb.append("Account locked: ").append(user.get().accountLocked()).append(" --> ").append(updatedProfile.accountLocked()).append("\n");
                 }
 
-                var updated = userRepository.update(new User(
-                        user.get().id(),
-                        updatedProfile.username(),
-                        user.get().password(),
-                        updatedProfile.firstname(),
-                        updatedProfile.lastname(),
-                        user.get().dateCreated(),
-                        updatedProfile.enabled(),
-                        updatedProfile.accountExpired(),
-                        updatedProfile.accountLocked()));
+                if (sb.length() > 0) {
+                    var updated = userRepository.update(new User(
+                            user.get().id(),
+                            updatedProfile.username(),
+                            user.get().password(),
+                            updatedProfile.firstname(),
+                            updatedProfile.lastname(),
+                            user.get().dateCreated(),
+                            updatedProfile.enabled(),
+                            updatedProfile.accountExpired(),
+                            updatedProfile.accountLocked()));
+                    log.info("\nUpdated UserID " + updated.id() + ":\n" + sb);
+                }
 
-                if (sb.length() > 0) log.info("\nUpdated UserID " + user.get().id() + ":\n" + sb.toString());
+                if (updatedProfile.addresses() != null){
+                    addressService.resolveAddresses(updatedProfile.addresses(), user.get());
+                }
 
             } catch (Exception e) {
                 log.error(e.getMessage());
