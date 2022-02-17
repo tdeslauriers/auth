@@ -38,7 +38,7 @@ public class AddressServiceImpl implements AddressService {
         // user has no addresses
         if (!userAddresses.iterator().hasNext()){
             addresses.forEach(address -> {
-                obtainAddressUserAssociation(address, user);
+                createAddressUserAssociation(address, user);
             });
         }
 
@@ -57,7 +57,7 @@ public class AddressServiceImpl implements AddressService {
                             throw new IllegalArgumentException("Cannot add duplicate addresses.");
                         }
                     });
-                    obtainAddressUserAssociation(address, user);
+                    createAddressUserAssociation(address, user);
                 }
 
                 // edit
@@ -95,7 +95,7 @@ public class AddressServiceImpl implements AddressService {
         }
     }
 
-    private void obtainAddressUserAssociation(Address address, User user){
+    private void createAddressUserAssociation(Address address, User user){
 
         var lookupAddress = addressRepository.findByAddress(
                 address.address(), address.city(), address.state(), address.zip());
