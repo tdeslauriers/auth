@@ -98,12 +98,17 @@ public class AddressServiceImpl implements AddressService {
     private void linkUserToAddress(Address address, User user){
 
         var lookupAddress = addressRepository.findByAddress(
-                address.address(), address.city(), address.state(), address.zip());
+                address.address(),
+                address.city(),
+                address.state(),
+                address.zip());
+
         if (lookupAddress.isEmpty()){
             var linkedAddress = userAddressRepository.save(new UserAddress(user, addressRepository.save(address)));
             log.info("Created new address: " + linkedAddress.address());
             log.info(user.id() + ":" + user.username() + " associated to: " + linkedAddress.address());
         }
+
         if (lookupAddress.isPresent()){
             var linkedAddress = userAddressRepository.save(new UserAddress(user, lookupAddress.get()));
             log.info(user.id() + ":" + user.username() + " associated to: " + linkedAddress.address());
