@@ -33,6 +33,7 @@ public class AddressServiceImpl implements AddressService {
     public Optional<Address> getByAddress(String address, String city, String state, String zip){
         return addressRepository.findByAddress(address, city, state, zip);
     }
+
     @Override
     public void resolveAddresses(HashSet<Address> addresses, User user) {
 
@@ -61,16 +62,40 @@ public class AddressServiceImpl implements AddressService {
             // no adding; take id from existing
             var updated = userAddresses.iterator().next().address();
             if (!addresses.stream().findFirst().get().address().equals(updated.address())){
-                sb.append("\nUpdating address:" + updated.id() + "'s street address: " + updated.address() + " --> " + addresses.iterator().next().address());
+                sb
+                        .append("\nUpdating address:")
+                        .append(updated.id())
+                        .append("'s street address: ")
+                        .append(updated.address())
+                        .append(" --> ")
+                        .append(addresses.iterator().next().address());
             }
             if (!addresses.stream().findFirst().get().city().equals(updated.city())){
-                sb.append("\nUpdating address:" + updated.id() + "'s city: " + updated.city() + " --> " + addresses.iterator().next().city());
+                sb
+                        .append("\nUpdating address:")
+                        .append(updated.id())
+                        .append("'s street address: ")
+                        .append(updated.city())
+                        .append(" --> ")
+                        .append(addresses.iterator().next().city());
             }
             if (!addresses.stream().findFirst().get().state().equals(updated.state())){
-                sb.append("\nUpdating address:" + updated.id() + "'s city: " + updated.state() + " --> " + addresses.iterator().next().state());
+                sb
+                        .append("\nUpdating address:")
+                        .append(updated.id())
+                        .append("'s street address: ")
+                        .append(updated.state())
+                        .append(" --> ")
+                        .append(addresses.iterator().next().state());
             }
             if (!addresses.stream().findFirst().get().zip().equals(updated.zip())){
-                sb.append("\nUpdating address:" + updated.id() + "'s city: " + updated.zip() + " --> " + addresses.iterator().next().zip());
+                sb
+                        .append("\nUpdating address:")
+                        .append(updated.id())
+                        .append("'s street address: ")
+                        .append(updated.zip())
+                        .append(" --> ")
+                        .append(addresses.iterator().next().zip());
             }
             if (sb.length() > 0) {
                 updated = addressRepository.update(new Address(
