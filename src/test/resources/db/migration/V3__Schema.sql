@@ -15,6 +15,4 @@ INSERT INTO address (address, city, state, zip)
 INSERT INTO user_address (user_id, address_id)
     VALUES
         ((SELECT id FROM user WHERE username = "admin@deslauriers.world"),
-        (SELECT id FROM address WHERE address = "123 House Street")),
-        ((SELECT id FROM user WHERE username = "admin@deslauriers.world"),
-        (SELECT id FROM address WHERE address = "456 Apartment Blvd"));
+        (SELECT id FROM address WHERE address = "123 House Street"));

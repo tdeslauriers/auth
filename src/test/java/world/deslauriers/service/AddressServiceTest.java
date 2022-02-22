@@ -30,7 +30,7 @@ public class AddressServiceTest {
         var user = userService.lookupUserByUsername("admin@deslauriers.world").get();
         var userAddresses = userAddressRepository.findByUser(user);
         assertTrue(userAddresses.iterator().hasNext());
-        assertEquals(2, ((Collection<?>) userAddresses).size());
+        assertEquals(1, ((Collection<?>) userAddresses).size());
 
         var address = addressRepository.findByAddress(
                 userAddresses.iterator().next().address().address(),
@@ -49,62 +49,60 @@ public class AddressServiceTest {
                 userAddresses.iterator().next().address().zip()));
         addressService.resolveAddresses(addresses, user);
         userAddresses = userAddressRepository.findByUser(user);
-        assertEquals(2, ((Collection<?>) userAddresses).size());
+        assertEquals(1, ((Collection<?>) userAddresses).size());
+        userAddresses.forEach(userAddress -> System.out.println(userAddress.address()));
         assertEquals("111 New Address Street", ((Collection<UserAddress>) userAddresses)
                 .stream()
                 .filter(userAddress -> userAddress.address().address().equals("111 New Address Street"))
                 .findFirst().get().address().address());
 
-        // add new address to existing
+        // must fail to add more than one address.
+        addresses.add(new Address("789 Condo Lane", "Cityopolis", "DC", "33333"));
+        var thrown = assertThrows(IllegalArgumentException.class, () ->{
+            addressService.resolveAddresses(addresses, user);
+        });
+        assertEquals("Can only add/edit one address.", thrown.getMessage());
+
+        // must fail to add new address if one already associated.
         addresses.clear();
+        addresses.add(new Address("789 Condo Lane", "Cityopolis", "DC", "33333"));
+        thrown = assertThrows(IllegalArgumentException.class, () -> {
+            addressService.resolveAddresses(addresses, user);
+        });
+        assertEquals("Address record exists; cannot add new.  Edit existing.",
+                    thrown.getMessage());
+
+        // add new address
+        // first need to clear xrefs
+        userAddresses.forEach(userAddress -> userAddressRepository.delete(userAddress));
+        userAddresses = userAddressRepository.findByUser(user);
+        assertFalse(userAddresses.iterator().hasNext());
         addresses.add(new Address("789 Condo Lane", "Cityopolis", "DC", "33333"));
         addressService.resolveAddresses(addresses, user);
 
+        // must check for existing address before adding address record:
+        userAddressRepository
+                .findByUser(user)
+                .forEach(userAddress -> userAddressRepository.delete(userAddress));
         userAddresses = userAddressRepository.findByUser(user);
-        assertTrue(userAddresses.iterator().hasNext());
-        assertEquals(3, ((Collection<?>) userAddresses).size());
-
-        var added = ((Collection<UserAddress>) userAddresses)
-                .stream()
-                .filter(userAddress -> userAddress.address().zip().equals("33333"))
-                .findFirst().get().address();
-        assertEquals("33333", added.zip());
-
-        // attempt to add duplicate
-        // repeats above since it should already exist
-        var thrown = assertThrows(IllegalArgumentException.class, () -> {
-            addressService.resolveAddresses(addresses, user);
-        });
-        assertEquals("Cannot add duplicate addresses.", thrown.getMessage());
-
-        // add existing address w/ no addresses associated.
-        // remove associations
-        userAddresses.forEach(userAddress -> userAddressRepository.delete(userAddress));
-        userAddresses = userAddressRepository.findByUser(user);
+        userAddresses.forEach(userAddress -> System.out.println("Testing:" + userAddress));
         assertFalse(userAddresses.iterator().hasNext());
-
-        addressService.resolveAddresses(addresses, user);
-        userAddresses = userAddressRepository.findByUser(user);
-        assertTrue(userAddresses.iterator().hasNext());
-        assertEquals(1, ((Collection<?>)userAddresses).size());
-        assertEquals(added.id(), userAddresses.iterator().next().address().id());
-
-        // add new address w/ no addresses associated.
-        // remove associations
-        userAddresses.forEach(userAddress -> userAddressRepository.delete(userAddress));
-        userAddresses = userAddressRepository.findByUser(user);
-        assertFalse(userAddresses.iterator().hasNext());
-
         addresses.clear();
-        addresses.add(new Address("222 No Path", "Nowheresville", "DC", "33333"));
+        var existing = addressService.getByAddress("789 Condo Lane", "Cityopolis", "DC", "33333");
+        assertTrue(existing.isPresent());
+        addresses.add(existing.get());
         addressService.resolveAddresses(addresses, user);
         userAddresses = userAddressRepository.findByUser(user);
-        assertTrue(userAddresses.iterator().hasNext());
-        assertEquals(1, ((Collection<?>) userAddresses).size());
-        assertNotNull(userAddresses.iterator().next().address().id());
-        assertEquals("222 No Path", userAddresses.iterator().next().address().address());
+        userAddresses.forEach(userAddress -> {
+           if (userAddress.address().address().equals("789 Condo Lane")){
+               assertEquals(existing.get().id(), userAddress.address().id());
+            }
+        });
 
         // fail validation
+        userAddressRepository
+                .findByUser(user)
+                .forEach(userAddress -> userAddressRepository.delete(userAddress));
         addresses.clear();
         addresses.add(new Address("", "Nowheresville", "DC", "33333"));
 

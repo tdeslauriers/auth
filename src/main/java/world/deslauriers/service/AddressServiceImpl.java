@@ -11,6 +11,7 @@ import world.deslauriers.repository.AddressRepository;
 import world.deslauriers.repository.UserAddressRepository;
 
 import java.util.HashSet;
+import java.util.Optional;
 
 @Singleton
 public class AddressServiceImpl implements AddressService {
@@ -28,70 +29,56 @@ public class AddressServiceImpl implements AddressService {
         this.userAddressRepository = userAddressRepository;
     }
 
-
+    @Override
+    public Optional<Address> getByAddress(String address, String city, String state, String zip){
+        return addressRepository.findByAddress(address, city, state, zip);
+    }
     @Override
     public void resolveAddresses(HashSet<Address> addresses, User user) {
 
-        // check if user has address(es)
+        // only allowed to add one or edit one
+        if (addresses.size() > 1) throw new IllegalArgumentException("Can only add/edit one address.");
+
+        // check if user has address
         var userAddresses = userAddressRepository.findByUser(user);
 
-        // user has no addresses
+        // user has no address
         if (!userAddresses.iterator().hasNext()){
-            addresses.forEach(address -> {
-                linkUserToAddress(address, user);
-            });
+            if(addresses.stream().findFirst().isPresent()){
+                linkUserToAddress(addresses.stream().findFirst().get(), user);
+            }
         }
 
-        // user has addresses
-        if (userAddresses.iterator().hasNext()){
-            addresses.forEach(address -> {
-                // add
-                if (address.id() == null){
-                    userAddresses.forEach(userAddress -> {
-                        if (address.address().equals(userAddress.address().address()) &&
-                                address.city().equals(userAddress.address().city()) &&
-                                address.state().equals(userAddress.address().state()) &&
-                                address.zip().equals(userAddress.address().zip())){
+        // user has address
+        if (userAddresses.iterator().hasNext() &&
+            addresses.stream().findFirst().isPresent()){
 
-                            log.error("Attempt to add duplicate address: " + address + " to user Id: " + user.id() + " - " + user.username());
-                            throw new IllegalArgumentException("Cannot add duplicate addresses.");
-                        }
-                    });
-                    linkUserToAddress(address, user);
-                }
+            if (addresses.stream().findFirst().get().id() == null) throw new IllegalArgumentException("Address record exists; cannot add new.  Edit existing.");
 
-                // edit
-                if (address.id() != null){
-                    userAddresses.forEach(userAddress -> {
-                        var sb = new StringBuilder();
-                        if (address.id().equals(userAddress.address().id())){
-
-                            if (!address.address().equals(userAddress.address().address())){
-                                sb.append("\nAddress " + address.id() + "street address: " + userAddress.address().address() + " --> " + address.address());
-                            }
-                            if (!address.city().equals(userAddress.address().city())){
-                                sb.append("\nAddress " + address.id() + "city: " + userAddress.address().city() + " --> " + address.city());
-                            }
-                            if (!address.state().equals(userAddress.address().state())){
-                                sb.append("\nAddress " + address.id() + "state: " + userAddress.address().state() + " --> " + address.state());
-                            }
-                            if (!address.zip().equals(userAddress.address().zip())){
-                                sb.append("\nAddress " + address.id() + "zip: " + userAddress.address().zip() + " --> " + address.zip());
-                            }
-
-                            if (sb.length() > 0){
-                                var updated = addressRepository.update(new Address(
-                                        address.id(),
-                                        address.address(),
-                                        address.city(),
-                                        address.state(),
-                                        address.zip()));
-                                log.info("Updated user " + user.username() + " address: " + sb);
-                            }
-                        }
-                    });
-                }
-            });
+            var sb = new StringBuilder();
+            // no adding; take id from existing
+            var updated = userAddresses.iterator().next().address();
+            if (!addresses.stream().findFirst().get().address().equals(updated.address())){
+                sb.append("\nUpdating address:" + updated.id() + "'s street address: " + updated.address() + " --> " + addresses.iterator().next().address());
+            }
+            if (!addresses.stream().findFirst().get().city().equals(updated.city())){
+                sb.append("\nUpdating address:" + updated.id() + "'s city: " + updated.city() + " --> " + addresses.iterator().next().city());
+            }
+            if (!addresses.stream().findFirst().get().state().equals(updated.state())){
+                sb.append("\nUpdating address:" + updated.id() + "'s city: " + updated.state() + " --> " + addresses.iterator().next().state());
+            }
+            if (!addresses.stream().findFirst().get().zip().equals(updated.zip())){
+                sb.append("\nUpdating address:" + updated.id() + "'s city: " + updated.zip() + " --> " + addresses.iterator().next().zip());
+            }
+            if (sb.length() > 0) {
+                updated = addressRepository.update(new Address(
+                        updated.id(),
+                        addresses.stream().findFirst().get().address(),
+                        addresses.stream().findFirst().get().city(),
+                        addresses.stream().findFirst().get().state(),
+                        addresses.stream().findFirst().get().zip()));
+                log.info("Updating " + user.username() + "'s address:" + sb.toString());
+            }
         }
     }
 
