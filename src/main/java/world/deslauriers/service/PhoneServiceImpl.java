@@ -1,6 +1,5 @@
 package world.deslauriers.service;
 
-import io.micronaut.core.annotation.NonNull;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
@@ -12,7 +11,7 @@ import world.deslauriers.repository.PhoneRepository;
 import world.deslauriers.repository.UserPhoneRepository;
 import world.deslauriers.service.constants.PhoneType;
 
-import java.util.*;
+import java.util.HashSet;
 
 @Singleton
 public class PhoneServiceImpl implements PhoneService {

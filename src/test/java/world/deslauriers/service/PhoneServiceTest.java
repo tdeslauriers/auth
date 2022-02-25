@@ -120,9 +120,7 @@ public class PhoneServiceTest {
 
         // add if no phone exists
         userPhoneRepository.findByUser(user).forEach(userPhone -> userPhoneRepository.delete(userPhone));
-        userPhones = userPhoneRepository.findByUser(user);
-        System.out.println(userPhones);
-        assertEquals(0, userPhones.size());
+        assertEquals(0, userPhoneRepository.findByUser(user).size());
         phones.clear();
         phones.add(new Phone(VALID_NEW_PHONE, "HOME"));
         phoneService.resolvePhones(phones, user);
