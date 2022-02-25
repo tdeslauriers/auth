@@ -1,0 +1,1 @@
+ALTER TABLE phone ADD COLUMN type VARCHAR(16) AFTER phone;

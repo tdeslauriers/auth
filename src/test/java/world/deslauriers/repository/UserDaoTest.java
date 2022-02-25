@@ -41,7 +41,7 @@ public class UserDaoTest {
         assertEquals(checkId, user.id());
         assertEquals("This_1_is_bad_2!", user.password());
 
-        var userphone = new UserPhone(user, phoneRepository.save(new Phone("6665554444")));
+        var userphone = new UserPhone(user, phoneRepository.save(new Phone("6665554444", "cell")));
         userphone = userPhoneRepository.save(userphone);
         assertNotNull(userphone.id());
         assertNotNull(userphone.phone().id());

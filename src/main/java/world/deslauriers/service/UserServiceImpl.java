@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService{
             if (user.get().userPhones() != null){
 
                 user.get().userPhones().forEach(userPhone -> {
-                    var phone = new Phone(userPhone.phone().id(), userPhone.phone().phone());
+                    var phone = new Phone(userPhone.phone().id(), userPhone.phone().phone(), userPhone.phone().type());
                     phones.add(phone);
                 });
             }
@@ -146,7 +146,8 @@ public class UserServiceImpl implements UserService{
         var user = userRepository.findById(updatedProfile.id());
 
         if (user.isEmpty()){
-            log.error("User Id: " + updatedProfile.id() + " - does not exist.");
+            log.error("Attempt to edit invalid User Id: " + updatedProfile.id() + " - does not exist.");
+            throw new IllegalArgumentException("Invalid user Id.");
         }
 
         if (user.isPresent()){

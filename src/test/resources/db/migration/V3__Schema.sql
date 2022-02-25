@@ -16,3 +16,4 @@ INSERT INTO user_address (user_id, address_id)
     VALUES
         ((SELECT id FROM user WHERE username = "admin@deslauriers.world"),
         (SELECT id FROM address WHERE address = "123 House Street"));
+

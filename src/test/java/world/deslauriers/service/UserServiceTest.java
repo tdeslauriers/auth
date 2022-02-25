@@ -3,6 +3,7 @@ package world.deslauriers.service;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
+import world.deslauriers.model.database.Address;
 import world.deslauriers.model.database.Role;
 import world.deslauriers.model.database.User;
 import world.deslauriers.model.database.UserRole;
@@ -11,6 +12,7 @@ import world.deslauriers.repository.UserRepository;
 import world.deslauriers.repository.UserRoleRepository;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,8 +59,26 @@ public class UserServiceTest {
         // admin profile update tests:
         // method will throw if field validation fails.
         // id not in db
+        var thrown = assertThrows(IllegalArgumentException.class, () -> {
+            userService.updateUser(new ProfileDto(
+                    444L,
+                    VALID_EMAIL,
+                    VALID_FIRST,
+                    VALID_LAST,
+                    LocalDate.now(),
+                    true,
+                    false,
+                    false,
+                    null,
+                    null));
+        });
+        assertEquals("Invalid user Id.", thrown.getMessage());
+
+        var addresses = new HashSet<Address>();
+        addresses.add(new Address("456 Test Street", "City", "CA", "55555"));
+
         userService.updateUser(new ProfileDto(
-                4444L,
+                user.id(),
                 user.username(),
                 user.firstname(),
                 user.lastname(),
@@ -66,10 +86,16 @@ public class UserServiceTest {
                 user.enabled(),
                 user.accountExpired(),
                 user.accountLocked(),
-                null,
+                addresses,
                 null));
 
         // field changes
+        // bad/malicious inputs require direct integration testing
+        var updated = userService.lookupUserByUsername(user.username()).get();
+        var addressId = updated.userAddresses().stream().filter(userAddress -> userAddress.address().address().equals("456 Test Street")).findFirst().get().id();
+        addresses = new HashSet<Address>();
+        addresses.add(new Address(addressId, "789 Different Ave", "City", "CA", "55555"));
+
         userService.updateUser(new ProfileDto(
                 user.id(),
                 user.username(),
@@ -79,10 +105,10 @@ public class UserServiceTest {
                 false,
                 user.accountExpired(),
                 user.accountLocked(),
-                null,
+                addresses,
                 null));
 
-        var updated = userService.lookupUserByUsername(user.username()).get();
+        updated = userService.lookupUserByUsername(user.username()).get();
         assertNotNull(updated.id());
         assertEquals(user.id(), updated.id());
         assertEquals(user.username(), updated.username());
@@ -93,6 +119,8 @@ public class UserServiceTest {
         assertFalse(updated.accountLocked());
         System.out.println(updated);
 
+
+        // find all
         var all = userRepository.findAllUsers();
         assertNotNull(all);
         assertTrue(all.iterator().hasNext());

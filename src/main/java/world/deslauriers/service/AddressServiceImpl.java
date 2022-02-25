@@ -55,7 +55,7 @@ public class AddressServiceImpl implements AddressService {
             addresses.stream().findFirst().isPresent()){
 
             if (addresses.stream().findFirst().get().id() == null){
-                throw new IllegalArgumentException("Address record exists; cannot add new.  Edit existing.");
+                throw new IllegalArgumentException("Address record exists. Cannot add new. Edit existing record.");
             }
 
             var sb = new StringBuilder();
