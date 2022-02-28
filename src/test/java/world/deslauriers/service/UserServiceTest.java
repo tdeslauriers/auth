@@ -3,10 +3,7 @@ package world.deslauriers.service;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
-import world.deslauriers.model.database.Address;
-import world.deslauriers.model.database.Role;
-import world.deslauriers.model.database.User;
-import world.deslauriers.model.database.UserRole;
+import world.deslauriers.model.database.*;
 import world.deslauriers.model.profile.ProfileDto;
 import world.deslauriers.repository.UserRepository;
 import world.deslauriers.repository.UserRoleRepository;
@@ -77,6 +74,9 @@ public class UserServiceTest {
         var addresses = new HashSet<Address>();
         addresses.add(new Address("456 Test Street", "City", "CA", "55555"));
 
+        var phones = new HashSet<Phone>();
+        phones.add((new Phone("4445556666", "WORK")));
+
         userService.updateUser(new ProfileDto(
                 user.id(),
                 user.username(),
@@ -87,7 +87,9 @@ public class UserServiceTest {
                 user.accountExpired(),
                 user.accountLocked(),
                 addresses,
-                null));
+                phones));
+
+
 
         // field changes
         // bad/malicious inputs require direct integration testing
@@ -95,6 +97,8 @@ public class UserServiceTest {
         var addressId = updated.userAddresses().stream().filter(userAddress -> userAddress.address().address().equals("456 Test Street")).findFirst().get().id();
         addresses = new HashSet<Address>();
         addresses.add(new Address(addressId, "789 Different Ave", "City", "CA", "55555"));
+
+
 
         userService.updateUser(new ProfileDto(
                 user.id(),
@@ -106,7 +110,7 @@ public class UserServiceTest {
                 user.accountExpired(),
                 user.accountLocked(),
                 addresses,
-                null));
+                phones));
 
         updated = userService.lookupUserByUsername(user.username()).get();
         assertNotNull(updated.id());

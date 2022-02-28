@@ -69,6 +69,7 @@ public class PhoneServiceImpl implements PhoneService {
                     if (current.size() + 1 > 3) {
                         log.error("Attempt to add more than 3 numbers");
                         throw new IllegalArgumentException("Only 3 phone numbers allowed.");
+
                     }
                     // no duplicate numbers/types
                     if (isDuplicatePhone(phone, current)) {

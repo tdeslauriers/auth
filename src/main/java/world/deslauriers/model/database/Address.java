@@ -19,7 +19,7 @@ public record Address(
         @Id @GeneratedValue Long id,
         @NonNull @NotBlank @Size(max = 128) String address,
         @NonNull @NotBlank @Size(max = 64) String city,
-        @NonNull @NotBlank @Size(max = 32) String state,
+        @NonNull @NotBlank @Size(min = 2, max = 2) String state,
         @NotNull @NotBlank @Size(min = 5, max = 10) String zip,
 
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "address")
