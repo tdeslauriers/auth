@@ -36,13 +36,17 @@ public class UserServiceImpl implements UserService{
     private final AddressService addressService;
 
     @Inject
+    private final PhoneService phoneService;
+
+    @Inject
     private final PasswordEncoderService passwordEncoderService;
 
-    public UserServiceImpl(UserRepository userRepository, UserRoleRepository userRoleRepository, RoleService roleService, AddressService addressService, PasswordEncoderService passwordEncoderService) {
+    public UserServiceImpl(UserRepository userRepository, UserRoleRepository userRoleRepository, RoleService roleService, AddressService addressService, PhoneService phoneService, PasswordEncoderService passwordEncoderService) {
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
         this.roleService = roleService;
         this.addressService = addressService;
+        this.phoneService = phoneService;
         this.passwordEncoderService = passwordEncoderService;
     }
 
@@ -199,6 +203,10 @@ public class UserServiceImpl implements UserService{
 
                 if (updatedProfile.addresses() != null){
                     addressService.resolveAddresses(updatedProfile.addresses(), user.get());
+                }
+
+                if (updatedProfile.phones() != null){
+                    phoneService.resolvePhones(updatedProfile.phones(), user.get());
                 }
 
             } catch (Exception e) {

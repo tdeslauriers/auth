@@ -69,7 +69,7 @@ public class AddressServiceTest {
         thrown = assertThrows(IllegalArgumentException.class, () -> {
             addressService.resolveAddresses(addresses, user);
         });
-        assertEquals("Address record exists; cannot add new.  Edit existing.",
+        assertEquals("Address record exists. Cannot add new. Edit existing record.",
                     thrown.getMessage());
 
         // add new address
