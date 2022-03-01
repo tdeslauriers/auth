@@ -10,9 +10,10 @@ import io.micronaut.security.token.jwt.render.AccessRefreshToken;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
-import world.deslauriers.model.database.User;
 import world.deslauriers.model.profile.ProfileDto;
 import world.deslauriers.model.registration.RegistrationDto;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,24 +49,24 @@ public class ProfileControllerTest {
                 .exchange(creds, AccessRefreshToken.class);
 
         // get user profile
-        var profile = client
+        AtomicReference<ProfileDto> profile = new AtomicReference<>(client
                 .toBlocking()
                 .retrieve(HttpRequest.GET("/profiles/user")
-                        .header("Authorization", "Bearer " + token.body().getAccessToken()), ProfileDto.class);
+                        .header("Authorization", "Bearer " + token.body().getAccessToken()), ProfileDto.class));
 
-        assertNotNull(profile.id());
-        assertEquals(VALID_EMAIL, profile.username());
+        assertNotNull(profile.get().id());
+        assertEquals(VALID_EMAIL, profile.get().username());
 
         // regular user attempt to update must fail
         var userUpdateReq = HttpRequest.PUT("/profiles/edit", new ProfileDto(
-                profile.id(),
-                profile.username(),
-                profile.firstname(),
-                profile.lastname(),
-                profile.dateCreated(),
-                profile.enabled(),
-                profile.accountExpired(),
-                profile.accountLocked(),
+                profile.get().id(),
+                profile.get().username(),
+                profile.get().firstname(),
+                profile.get().lastname(),
+                profile.get().dateCreated(),
+                profile.get().enabled(),
+                profile.get().accountExpired(),
+                profile.get().accountLocked(),
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
         var thrown = assertThrows(HttpClientResponseException.class, () -> {
@@ -77,16 +78,23 @@ public class ProfileControllerTest {
         creds = HttpRequest.POST("/login", new UsernamePasswordCredentials(ADMIN_EMAIL, ADMIN_CLEAR_PASSWORD));
         token = client.toBlocking().exchange(creds, AccessRefreshToken.class);
 
+        profile.set(client
+                .toBlocking()
+                .retrieve(HttpRequest.GET("/profiles/" + profile.get().id())
+                        .header("Authorization", "Bearer " + token.body().getAccessToken()), ProfileDto.class));
+        assertNotNull(profile);
+        assertEquals(VALID_EMAIL, profile.get().username());
+
         // happy path
         var adminUpdateReq = HttpRequest.PUT("/profiles/edit", new ProfileDto(
-                profile.id(),
+                profile.get().id(),
                 "bond.james@bond.com",
                 "James",
                 "Bond",
-                profile.dateCreated(),
+                profile.get().dateCreated(),
                 false,
-                profile.accountExpired(),
-                profile.accountLocked(),
+                profile.get().accountExpired(),
+                profile.get().accountLocked(),
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
         var updated = client.toBlocking().exchange(adminUpdateReq);
@@ -94,21 +102,31 @@ public class ProfileControllerTest {
 
         // for fun: using logback not log4j2
         var jndi = HttpRequest.PUT("/profiles/edit", new ProfileDto(
-                profile.id(),
+                profile.get().id(),
                 "${jndi:ldap//deslauriers.world/evil}@nope.com",
                 "${jndi:ldap//deslauriers.world/evil}",
                 "jndi:ldap//deslauriers.world/evil",
-                profile.dateCreated(),
-                profile.enabled(),
-                profile.accountExpired(),
-                profile.accountLocked(),
+                profile.get().dateCreated(),
+                profile.get().enabled(),
+                profile.get().accountExpired(),
+                profile.get().accountLocked(),
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
         thrown = assertThrows(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(jndi);
         });
         assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
+
+        // sad path
+        io.micronaut.http.HttpResponse<AccessRefreshToken> finalToken = token;
+        thrown = assertThrows(HttpClientResponseException.class, () -> {
+
+            profile.set(client
+                    .toBlocking()
+                    .retrieve(HttpRequest.GET("/profiles/666")
+                            .header("Authorization", "Bearer " + finalToken.body().getAccessToken()), ProfileDto.class));
+
+        });
+        assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
     }
-
-
 }

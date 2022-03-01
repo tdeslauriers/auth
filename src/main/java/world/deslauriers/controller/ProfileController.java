@@ -20,6 +20,7 @@ import world.deslauriers.service.UserService;
 import javax.validation.Valid;
 import java.net.URI;
 import java.security.Principal;
+import java.util.Optional;
 
 @ExecuteOn(TaskExecutors.IO)
 @Secured(SecurityRule.IS_AUTHENTICATED)
@@ -35,9 +36,9 @@ public class ProfileController {
 
     // users
     @Get("/user")
-    public ProfileDto getProfile(Principal principal){
+    public Optional<ProfileDto> getProfile(Principal principal){
 
-        return userService.getProfile(principal.getName()).orElse(null);
+        return userService.getProfile(principal.getName());
     }
 
     // admin
@@ -47,6 +48,14 @@ public class ProfileController {
 
         return userService.getAllUsers();
     }
+
+    @Secured({"PROFILE_ADMIN"})
+    @Get("/{id}")
+    public Optional<ProfileDto> getById(Long id){
+
+        return userService.getProfileById(id);
+    }
+
 
     @Secured({"PROFILE_ADMIN"})
     @Put("/edit")

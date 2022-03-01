@@ -6,11 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import world.deslauriers.model.database.Address;
 import world.deslauriers.model.database.Phone;
+import world.deslauriers.model.database.User;
 import world.deslauriers.model.database.UserRole;
 import world.deslauriers.model.profile.ProfileDto;
 import world.deslauriers.model.profile.UserDto;
 import world.deslauriers.model.registration.RegistrationDto;
-import world.deslauriers.model.database.User;
 import world.deslauriers.repository.UserRepository;
 import world.deslauriers.repository.UserRoleRepository;
 
@@ -92,52 +92,21 @@ public class UserServiceImpl implements UserService{
         return message.toString();
     }
 
+    // user
     @Override
     public Optional<ProfileDto> getProfile(String username){
 
         // user is present because came from jwt, login is user check
         var user = lookupUserByUsername(username);
-        if (user.isPresent()){
+        return user.map(this::buildProfile);
+    }
 
-            HashSet<Address> addresses = new HashSet<>();
-            if (user.get().userAddresses() != null){
+    // admin
+    @Override
+    public Optional<ProfileDto> getProfileById(Long id){
 
-                user.get().userAddresses().forEach(userAddress -> {
-                    var address = new Address(
-                            userAddress.address().id(),
-                            userAddress.address().address(),
-                            userAddress.address().city(),
-                            userAddress.address().state(),
-                            userAddress.address().zip()
-                    );
-                    addresses.add(address);
-                });
-            }
-
-            HashSet<Phone> phones = new HashSet<>();
-            if (user.get().userPhones() != null){
-
-                user.get().userPhones().forEach(userPhone -> {
-                    var phone = new Phone(userPhone.phone().id(), userPhone.phone().phone(), userPhone.phone().type());
-                    phones.add(phone);
-                });
-            }
-
-            return Optional.of(new ProfileDto(
-                    user.get().id(),
-                    user.get().username(),
-                    user.get().firstname(),
-                    user.get().lastname(),
-                    user.get().dateCreated(),
-                    user.get().enabled(),
-                    user.get().accountExpired(),
-                    user.get().accountLocked(),
-                    addresses,
-                    phones
-            ));
-        } else {
-            return null;
-        }
+        var user = userRepository.findById(id);
+        return user.map(this::buildProfile);
     }
 
     @Override
@@ -154,65 +123,85 @@ public class UserServiceImpl implements UserService{
             throw new IllegalArgumentException("Invalid user Id.");
         }
 
-        if (user.isPresent()){
-            try {
-                // logging is placeholder for updating user field history table
-                // update username
-                if (!updatedProfile.username().equals(user.get().username())){
-                    sb.append(user.get().username()).append(" --> ").append(updatedProfile.username()).append("\n");
-                }
-
-                // update firstname
-                if (!updatedProfile.firstname().equals(user.get().firstname())){
-                    sb.append(user.get().firstname()).append(" --> ").append(updatedProfile.firstname()).append("\n");
-                }
-
-                // update lastname
-                if (!updatedProfile.lastname().equals(user.get().lastname())){
-                    sb.append(user.get().lastname()).append(" --> ").append(updatedProfile.lastname()).append("\n");
-                }
-
-                // enabled?
-                if (!updatedProfile.enabled().equals(user.get().enabled())){
-                    sb.append("Enabled: ").append(user.get().enabled()).append(" --> ").append(updatedProfile.enabled()).append("\n");
-                }
-
-                // account expired?
-                if (!updatedProfile.accountExpired().equals(user.get().accountExpired())){
-                    sb.append("Account expired: ").append(user.get().accountExpired()).append(" --> ").append(updatedProfile.accountExpired()).append("\n");
-                }
-
-                // account locked?
-                if (!updatedProfile.accountLocked().equals(user.get().accountLocked())){
-                    sb.append("Account locked: ").append(user.get().accountLocked()).append(" --> ").append(updatedProfile.accountLocked()).append("\n");
-                }
-
-                if (sb.length() > 0) {
-                    var updated = userRepository.update(new User(
-                            user.get().id(),
-                            updatedProfile.username(),
-                            user.get().password(),
-                            updatedProfile.firstname(),
-                            updatedProfile.lastname(),
-                            user.get().dateCreated(),
-                            updatedProfile.enabled(),
-                            updatedProfile.accountExpired(),
-                            updatedProfile.accountLocked()));
-                    log.info("\nUpdated UserID " + updated.id() + ":\n" + sb);
-                }
-
-                if (updatedProfile.addresses() != null){
-                    addressService.resolveAddresses(updatedProfile.addresses(), user.get());
-                }
-
-                if (updatedProfile.phones() != null){
-                    phoneService.resolvePhones(updatedProfile.phones(), user.get());
-                }
-
-            } catch (IllegalArgumentException e) {
-                log.error(e.getMessage());
-                throw e;
+        try {
+            // logging is placeholder for updating user field history table
+            // update username
+            if (!updatedProfile.username().equals(user.get().username())){
+                sb.append(user.get().username()).append(" --> ").append(updatedProfile.username()).append("\n");
             }
+
+            // update firstname
+            if (!updatedProfile.firstname().equals(user.get().firstname())){
+                sb.append(user.get().firstname()).append(" --> ").append(updatedProfile.firstname()).append("\n");
+            }
+
+            // update lastname
+            if (!updatedProfile.lastname().equals(user.get().lastname())){
+                sb.append(user.get().lastname()).append(" --> ").append(updatedProfile.lastname()).append("\n");
+            }
+
+            // enabled?
+            if (!updatedProfile.enabled().equals(user.get().enabled())){
+                sb.append("Enabled: ").append(user.get().enabled()).append(" --> ").append(updatedProfile.enabled()).append("\n");
+            }
+
+            // account expired?
+            if (!updatedProfile.accountExpired().equals(user.get().accountExpired())){
+                sb.append("Account expired: ").append(user.get().accountExpired()).append(" --> ").append(updatedProfile.accountExpired()).append("\n");
+            }
+
+            // account locked?
+            if (!updatedProfile.accountLocked().equals(user.get().accountLocked())){
+                sb.append("Account locked: ").append(user.get().accountLocked()).append(" --> ").append(updatedProfile.accountLocked()).append("\n");
+            }
+
+            if (sb.length() > 0) {
+                var updated = userRepository.update(new User(
+                        user.get().id(),
+                        updatedProfile.username(),
+                        user.get().password(),
+                        updatedProfile.firstname(),
+                        updatedProfile.lastname(),
+                        user.get().dateCreated(),
+                        updatedProfile.enabled(),
+                        updatedProfile.accountExpired(),
+                        updatedProfile.accountLocked()));
+                log.info("\nUpdated UserID " + updated.id() + ":\n" + sb);
+            }
+
+            if (updatedProfile.addresses() != null){
+                addressService.resolveAddresses(updatedProfile.addresses(), user.get());
+            }
+
+            if (updatedProfile.phones() != null){
+                phoneService.resolvePhones(updatedProfile.phones(), user.get());
+            }
+
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
+            throw e;
         }
+    }
+
+    private ProfileDto buildProfile(User user){
+
+        var addresses = new HashSet<Address>();
+        user.userAddresses().forEach(userAddress -> addresses.add(userAddress.address()));
+
+        var phones = new HashSet<Phone>();
+        user.userPhones().forEach(userPhone -> phones.add(userPhone.phone()));
+
+
+        return new ProfileDto(
+                user.id(),
+                user.username(),
+                user.firstname(),
+                user.lastname(),
+                user.dateCreated(),
+                user.enabled(),
+                user.accountExpired(),
+                user.accountLocked(),
+                addresses,
+                phones);
     }
 }

@@ -19,5 +19,7 @@ public interface UserService {
 
     Optional<ProfileDto> getProfile(String username);
 
+    Optional<ProfileDto> getProfileById(Long id);
+
     void updateUser(ProfileDto updatedProfile);
 }

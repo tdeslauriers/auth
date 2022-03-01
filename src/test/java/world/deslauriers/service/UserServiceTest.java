@@ -110,18 +110,33 @@ public class UserServiceTest {
                 user.accountExpired(),
                 user.accountLocked(),
                 addresses,
-                phones));
+                null)); // needs id so putting null to avoid error
 
-        updated = userService.lookupUserByUsername(user.username()).get();
-        assertNotNull(updated.id());
-        assertEquals(user.id(), updated.id());
-        assertEquals(user.username(), updated.username());
-        assertEquals(user.firstname(), updated.firstname());
-        assertEquals("007", updated.lastname());
-        assertFalse(updated.enabled());
-        assertFalse(updated.accountExpired());
-        assertFalse(updated.accountLocked());
-        System.out.println(updated);
+        // user get profile
+        var profile = userService.getProfile(user.username());
+        assertNotNull(profile.get().id());
+        assertEquals(user.id(), profile.get().id());
+        assertEquals(user.username(), profile.get().username());
+        assertEquals(user.firstname(), profile.get().firstname());
+        assertEquals("007", profile.get().lastname());
+        assertFalse(profile.get().enabled());
+        assertFalse(profile.get().accountExpired());
+        assertFalse(profile.get().accountLocked());
+
+        assertTrue(userService.getProfile("Not a real name").isEmpty());
+
+        // admin get profile by id
+        profile = userService.getProfileById(user.id());
+        assertNotNull(profile.get().id());
+        assertEquals(user.id(), profile.get().id());
+        assertEquals(user.username(), profile.get().username());
+        assertEquals(user.firstname(), profile.get().firstname());
+        assertEquals("007", profile.get().lastname());
+        assertFalse(profile.get().enabled());
+        assertFalse(profile.get().accountExpired());
+        assertFalse(profile.get().accountLocked());
+
+        assertTrue(userService.getProfileById(666L).isEmpty());
 
 
         // find all
@@ -130,7 +145,6 @@ public class UserServiceTest {
         assertTrue(all.iterator().hasNext());
         assertNotNull(all.iterator().next().id());
         assertEquals(all.iterator().next().firstname(), VALID_FIRST);
-
     }
 
 }
