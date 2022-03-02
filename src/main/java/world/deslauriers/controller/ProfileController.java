@@ -10,6 +10,7 @@ import io.micronaut.http.annotation.Put;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.rules.SecurityRule;
 import jakarta.inject.Inject;
 import world.deslauriers.model.profile.ProfileDto;
@@ -41,6 +42,28 @@ public class ProfileController {
         return userService.getProfile(principal.getName());
     }
 
+    @Put("/user")
+    public HttpResponse updateProfile(@Body @Valid ProfileDto updatedProfile, Principal principal){
+
+        var allowed = userService.lookupUserByUsername(principal.getName()).get();
+
+        userService.updateUser(new ProfileDto(
+                allowed.id(),
+                allowed.username(),
+                updatedProfile.firstname(),
+                updatedProfile.lastname(),
+                allowed.dateCreated(),
+                allowed.enabled(),
+                allowed.accountExpired(),
+                allowed.accountLocked(),
+                updatedProfile.addresses(),
+                updatedProfile.phones()));
+
+        return HttpResponse
+                .noContent()
+                .header(HttpHeaders.LOCATION, URI.create("/user").getPath());
+    }
+
     // admin
     @Secured({"PROFILE_ADMIN"})
     @Get("/all")
@@ -59,7 +82,7 @@ public class ProfileController {
 
     @Secured({"PROFILE_ADMIN"})
     @Put("/edit")
-    public HttpResponse update(@Body @Valid ProfileDto updatedProfile){
+    public HttpResponse updateUser(@Body @Valid ProfileDto updatedProfile){
 
         if (updatedProfile.id() == null){
             var err = new RegistrationResponseDto(400, "Bad Request", "User id required.", "/edit");
@@ -70,10 +93,6 @@ public class ProfileController {
 
         return HttpResponse
                 .noContent()
-                .header(HttpHeaders.LOCATION, location(updatedProfile.id()).getPath());
-    }
-
-    protected URI location(Long id){
-        return URI.create("/profiles/edit/" + id);
+                .header(HttpHeaders.LOCATION, URI.create("/profiles/" + updatedProfile.id()).getPath());
     }
 }

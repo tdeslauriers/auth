@@ -113,9 +113,6 @@ public class UserServiceImpl implements UserService{
     public void updateUser(ProfileDto updatedProfile) {
 
         var sb = new StringBuilder();
-        HashSet<Address> addresses = new HashSet<>();
-        HashSet<Phone> phones = new HashSet<>();
-
         var user = userRepository.findById(updatedProfile.id());
 
         if (user.isEmpty()){

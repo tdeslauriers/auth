@@ -57,7 +57,7 @@ public class ProfileControllerTest {
         assertNotNull(profile.get().id());
         assertEquals(VALID_EMAIL, profile.get().username());
 
-        // regular user attempt to update must fail
+        // regular user attempt to update must fail on admin endpoint
         var userUpdateReq = HttpRequest.PUT("/profiles/edit", new ProfileDto(
                 profile.get().id(),
                 profile.get().username(),
@@ -73,6 +73,34 @@ public class ProfileControllerTest {
             client.toBlocking().exchange(userUpdateReq);
         });
         assertEquals(HttpStatus.FORBIDDEN, thrown.getResponse().getStatus());
+
+        // user update own profile
+        // user not allowed to specify id/username/datecreated/enabled/expired/locked
+        // endpoint should dump those values
+        var validUserUpdateReq = HttpRequest.PUT("/profiles/user", new ProfileDto(
+                666L,
+                "agent.smith@matrix.com",
+                "Agent",
+                "Smith",
+                profile.get().dateCreated(),
+                false,
+                profile.get().accountExpired(),
+                profile.get().accountLocked(),
+                null,
+                null)).header("Authorization", "Bearer " + token.body().getAccessToken());
+        var updated = client.toBlocking().exchange(validUserUpdateReq);
+        assertEquals(HttpStatus.NO_CONTENT, updated.getStatus());
+        profile.set(client
+                .toBlocking()
+                .retrieve(HttpRequest.GET("/profiles/user")
+                        .header("Authorization", "Bearer " + token.body().getAccessToken()), ProfileDto.class));
+        assertEquals("Agent", profile.get().firstname());
+        assertEquals("Smith", profile.get().lastname());
+        // endpoint must disregard/dump disallowed fields
+        assertNotEquals(666L, profile.get().id());
+        assertNotEquals("agent.smith@matrix.com", profile.get().username());
+        assertEquals(VALID_EMAIL, profile.get().username());  // cant change your email or your token wont work
+        assertTrue(profile.get().enabled());
 
         // login as admin (created test data)
         creds = HttpRequest.POST("/login", new UsernamePasswordCredentials(ADMIN_EMAIL, ADMIN_CLEAR_PASSWORD));
@@ -97,7 +125,7 @@ public class ProfileControllerTest {
                 profile.get().accountLocked(),
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
-        var updated = client.toBlocking().exchange(adminUpdateReq);
+        updated = client.toBlocking().exchange(adminUpdateReq);
         assertEquals(HttpStatus.NO_CONTENT, updated.getStatus());
 
         // for fun: using logback not log4j2
