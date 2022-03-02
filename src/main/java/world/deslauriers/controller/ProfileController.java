@@ -13,6 +13,8 @@ import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.rules.SecurityRule;
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import world.deslauriers.model.profile.ProfileDto;
 import world.deslauriers.model.profile.UserDto;
 import world.deslauriers.model.registration.RegistrationResponseDto;
@@ -27,6 +29,8 @@ import java.util.Optional;
 @Secured(SecurityRule.IS_AUTHENTICATED)
 @Controller("/profiles")
 public class ProfileController {
+
+    private static final Logger log = LoggerFactory.getLogger(ProfileController.class);
 
     @Inject
     private final UserService userService;
@@ -45,17 +49,22 @@ public class ProfileController {
     @Put("/user")
     public HttpResponse updateProfile(@Body @Valid ProfileDto updatedProfile, Principal principal){
 
-        var allowed = userService.lookupUserByUsername(principal.getName()).get();
+        var allowed = userService.lookupUserByUsername(principal.getName());
 
-        userService.updateUser(new ProfileDto(
-                allowed.id(),
-                allowed.username(),
+        if (allowed.isEmpty()){
+            log.warn("Attempt to edit non-existent user: " + principal.getName());
+            return HttpResponse.status(HttpStatus.BAD_REQUEST).body("User does not exist.");
+        }
+
+        userService.updateUser(allowed.get(), new ProfileDto(
+                allowed.get().id(),
+                allowed.get().username(),
                 updatedProfile.firstname(),
                 updatedProfile.lastname(),
-                allowed.dateCreated(),
-                allowed.enabled(),
-                allowed.accountExpired(),
-                allowed.accountLocked(),
+                allowed.get().dateCreated(),
+                allowed.get().enabled(),
+                allowed.get().accountExpired(),
+                allowed.get().accountLocked(),
                 updatedProfile.addresses(),
                 updatedProfile.phones()));
 
@@ -84,12 +93,14 @@ public class ProfileController {
     @Put("/edit")
     public HttpResponse updateUser(@Body @Valid ProfileDto updatedProfile){
 
-        if (updatedProfile.id() == null){
-            var err = new RegistrationResponseDto(400, "Bad Request", "User id required.", "/edit");
-            return HttpResponse.status(HttpStatus.BAD_REQUEST).body(err);
+        var user = userService.lookupUserById(updatedProfile.id());
+
+        if (user.isEmpty()){
+            log.error("Attempt to edit invalid User Id: " + updatedProfile.id() + " - does not exist.");
+            throw new IllegalArgumentException("Invalid user Id.");
         }
 
-        userService.updateUser(updatedProfile);
+        userService.updateUser(user.get(), updatedProfile);
 
         return HttpResponse
                 .noContent()

@@ -52,32 +52,13 @@ public class UserServiceTest {
         assertEquals(VALID_EMAIL, user.username());
         assertEquals(2, user.userRoles().size());
 
-
-        // admin profile update tests:
-        // method will throw if field validation fails.
-        // id not in db
-        var thrown = assertThrows(IllegalArgumentException.class, () -> {
-            userService.updateUser(new ProfileDto(
-                    444L,
-                    VALID_EMAIL,
-                    VALID_FIRST,
-                    VALID_LAST,
-                    LocalDate.now(),
-                    true,
-                    false,
-                    false,
-                    null,
-                    null));
-        });
-        assertEquals("Invalid user Id.", thrown.getMessage());
-
         var addresses = new HashSet<Address>();
         addresses.add(new Address("456 Test Street", "City", "CA", "55555"));
 
         var phones = new HashSet<Phone>();
         phones.add((new Phone("4445556666", "WORK")));
 
-        userService.updateUser(new ProfileDto(
+        userService.updateUser(user, new ProfileDto(
                 user.id(),
                 user.username(),
                 user.firstname(),
@@ -89,8 +70,6 @@ public class UserServiceTest {
                 addresses,
                 phones));
 
-
-
         // field changes
         // bad/malicious inputs require direct integration testing
         var updated = userService.lookupUserByUsername(user.username()).get();
@@ -98,9 +77,7 @@ public class UserServiceTest {
         addresses = new HashSet<Address>();
         addresses.add(new Address(addressId, "789 Different Ave", "City", "CA", "55555"));
 
-
-
-        userService.updateUser(new ProfileDto(
+        userService.updateUser(user, new ProfileDto(
                 user.id(),
                 user.username(),
                 VALID_FIRST,

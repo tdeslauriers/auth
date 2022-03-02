@@ -52,19 +52,21 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public Boolean userExists(String email){
-
         return userRepository.findUsername(email).isPresent();
     }
 
     @Override
     public Optional<User> lookupUserByUsername(String email) {
-
         return userRepository.findByUsername(email);
     }
 
     @Override
-    public Iterable<UserDto> getAllUsers(){
+    public Optional<User> lookupUserById(Long id){
+        return userRepository.findById(id);
+    }
 
+    @Override
+    public Iterable<UserDto> getAllUsers(){
         return userRepository.findAllUsers();
     }
 
@@ -110,56 +112,49 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void updateUser(ProfileDto updatedProfile) {
+    public void updateUser(User user, ProfileDto updatedProfile) {
 
         var sb = new StringBuilder();
-        var user = userRepository.findById(updatedProfile.id());
-
-        if (user.isEmpty()){
-            log.error("Attempt to edit invalid User Id: " + updatedProfile.id() + " - does not exist.");
-            throw new IllegalArgumentException("Invalid user Id.");
-        }
-
         try {
             // logging is placeholder for updating user field history table
             // update username
-            if (!updatedProfile.username().equals(user.get().username())){
-                sb.append(user.get().username()).append(" --> ").append(updatedProfile.username()).append("\n");
+            if (!updatedProfile.username().equals(user.username())){
+                sb.append(user.username()).append(" --> ").append(updatedProfile.username()).append("\n");
             }
 
             // update firstname
-            if (!updatedProfile.firstname().equals(user.get().firstname())){
-                sb.append(user.get().firstname()).append(" --> ").append(updatedProfile.firstname()).append("\n");
+            if (!updatedProfile.firstname().equals(user.firstname())){
+                sb.append(user.firstname()).append(" --> ").append(updatedProfile.firstname()).append("\n");
             }
 
             // update lastname
-            if (!updatedProfile.lastname().equals(user.get().lastname())){
-                sb.append(user.get().lastname()).append(" --> ").append(updatedProfile.lastname()).append("\n");
+            if (!updatedProfile.lastname().equals(user.lastname())){
+                sb.append(user.lastname()).append(" --> ").append(updatedProfile.lastname()).append("\n");
             }
 
             // enabled?
-            if (!updatedProfile.enabled().equals(user.get().enabled())){
-                sb.append("Enabled: ").append(user.get().enabled()).append(" --> ").append(updatedProfile.enabled()).append("\n");
+            if (!updatedProfile.enabled().equals(user.enabled())){
+                sb.append("Enabled: ").append(user.enabled()).append(" --> ").append(updatedProfile.enabled()).append("\n");
             }
 
             // account expired?
-            if (!updatedProfile.accountExpired().equals(user.get().accountExpired())){
-                sb.append("Account expired: ").append(user.get().accountExpired()).append(" --> ").append(updatedProfile.accountExpired()).append("\n");
+            if (!updatedProfile.accountExpired().equals(user.accountExpired())){
+                sb.append("Account expired: ").append(user.accountExpired()).append(" --> ").append(updatedProfile.accountExpired()).append("\n");
             }
 
             // account locked?
-            if (!updatedProfile.accountLocked().equals(user.get().accountLocked())){
-                sb.append("Account locked: ").append(user.get().accountLocked()).append(" --> ").append(updatedProfile.accountLocked()).append("\n");
+            if (!updatedProfile.accountLocked().equals(user.accountLocked())){
+                sb.append("Account locked: ").append(user.accountLocked()).append(" --> ").append(updatedProfile.accountLocked()).append("\n");
             }
 
             if (sb.length() > 0) {
                 var updated = userRepository.update(new User(
-                        user.get().id(),
+                        user.id(),
                         updatedProfile.username(),
-                        user.get().password(),
+                        user.password(),
                         updatedProfile.firstname(),
                         updatedProfile.lastname(),
-                        user.get().dateCreated(),
+                        user.dateCreated(),
                         updatedProfile.enabled(),
                         updatedProfile.accountExpired(),
                         updatedProfile.accountLocked()));
@@ -167,11 +162,11 @@ public class UserServiceImpl implements UserService{
             }
 
             if (updatedProfile.addresses() != null){
-                addressService.resolveAddresses(updatedProfile.addresses(), user.get());
+                addressService.resolveAddresses(updatedProfile.addresses(), user);
             }
 
             if (updatedProfile.phones() != null){
-                phoneService.resolvePhones(updatedProfile.phones(), user.get());
+                phoneService.resolvePhones(updatedProfile.phones(), user);
             }
 
         } catch (IllegalArgumentException e) {

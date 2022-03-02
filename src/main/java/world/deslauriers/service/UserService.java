@@ -10,16 +10,14 @@ import java.util.Optional;
 public interface UserService {
 
     Boolean userExists(String email);
-
-    Optional<User> lookupUserByUsername(String email);
-
-    Iterable<UserDto> getAllUsers();
-
     String registerUser(RegistrationDto registrationDto);
 
-    Optional<ProfileDto> getProfile(String username);
+    Optional<User> lookupUserByUsername(String email);
+    Optional<User> lookupUserById(Long id);
+    Iterable<UserDto> getAllUsers();
 
+    Optional<ProfileDto> getProfile(String username);
     Optional<ProfileDto> getProfileById(Long id);
 
-    void updateUser(ProfileDto updatedProfile);
+    void updateUser(User user, ProfileDto updatedProfile);
 }
