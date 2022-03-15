@@ -33,6 +33,11 @@ public interface UserRepository extends PageableRepository<User, Long> {
     @Join(value = "userPhones.phone", type = Join.Type.LEFT_FETCH)
     Optional<User> findById(Long id);
 
-    @Query(value = "SELECT id, username, firstname, lastname, date_created, enabled, account_expired, account_locked FROM user")
-    Iterable<UserDto> findAllUsers();
+    @Join(value = "userRoles", type = Join.Type.LEFT_FETCH)
+    @Join(value = "userRoles.role", type = Join.Type.LEFT_FETCH)
+    @Join(value = "userAddresses", type = Join.Type.LEFT_FETCH)
+    @Join(value = "userAddresses.address", type = Join.Type.LEFT_FETCH)
+    @Join(value = "userPhones", type = Join.Type.LEFT_FETCH)
+    @Join(value = "userPhones.phone", type = Join.Type.LEFT_FETCH)
+    Iterable<User> findAll();
 }

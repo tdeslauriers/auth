@@ -4,6 +4,7 @@ import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.NonNull;
 import world.deslauriers.model.database.Address;
 import world.deslauriers.model.database.Phone;
+import world.deslauriers.model.database.Role;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -21,10 +22,11 @@ public record ProfileDto(
         Boolean enabled,
         Boolean accountExpired,
         Boolean accountLocked,
+        HashSet<Role> roles,
         HashSet<Address> addresses,
         HashSet<Phone> phones
 ) {
-    public ProfileDto(@NonNull String username, @NonNull String firstname, @NonNull String lastname, HashSet<Address> addresses, HashSet<Phone> phones) {
-        this(null, username, firstname, lastname, null, null, null, null, addresses, phones);
+    public ProfileDto(@NonNull String username, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, HashSet<Role> roles, HashSet<Address> addresses, HashSet<Phone> phones) {
+        this(null, username, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, roles, addresses, phones);
     }
 }

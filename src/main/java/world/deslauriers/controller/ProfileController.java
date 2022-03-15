@@ -65,6 +65,7 @@ public class ProfileController {
                 allowed.get().enabled(),
                 allowed.get().accountExpired(),
                 allowed.get().accountLocked(),
+                null,
                 updatedProfile.addresses(),
                 updatedProfile.phones()));
 
@@ -76,7 +77,7 @@ public class ProfileController {
     // admin
     @Secured({"PROFILE_ADMIN"})
     @Get("/all")
-    public Iterable<UserDto> getAll(){
+    public Iterable<ProfileDto> getAll(){
 
         return userService.getAllUsers();
     }
@@ -87,7 +88,6 @@ public class ProfileController {
 
         return userService.getProfileById(id);
     }
-
 
     @Secured({"PROFILE_ADMIN"})
     @Put("/edit")

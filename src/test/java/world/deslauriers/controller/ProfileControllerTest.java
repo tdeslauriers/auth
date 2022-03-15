@@ -68,6 +68,7 @@ public class ProfileControllerTest {
                 profile.get().accountExpired(),
                 profile.get().accountLocked(),
                 null,
+                null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
         var thrown = assertThrows(HttpClientResponseException.class, () -> {
             client.toBlocking().exchange(userUpdateReq);
@@ -86,6 +87,7 @@ public class ProfileControllerTest {
                 false,
                 profile.get().accountExpired(),
                 profile.get().accountLocked(),
+                null,
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
         var updated = client.toBlocking().exchange(validUserUpdateReq);
@@ -124,6 +126,7 @@ public class ProfileControllerTest {
                 profile.get().accountExpired(),
                 profile.get().accountLocked(),
                 null,
+                null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
         updated = client.toBlocking().exchange(adminUpdateReq);
         assertEquals(HttpStatus.NO_CONTENT, updated.getStatus());
@@ -138,6 +141,7 @@ public class ProfileControllerTest {
                 profile.get().enabled(),
                 profile.get().accountExpired(),
                 profile.get().accountLocked(),
+                null,
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
         thrown = assertThrows(HttpClientResponseException.class, () -> {

@@ -4,10 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import world.deslauriers.model.database.Address;
-import world.deslauriers.model.database.Phone;
-import world.deslauriers.model.database.User;
-import world.deslauriers.model.database.UserRole;
+import world.deslauriers.model.database.*;
 import world.deslauriers.model.profile.ProfileDto;
 import world.deslauriers.model.profile.UserDto;
 import world.deslauriers.model.registration.RegistrationDto;
@@ -15,6 +12,8 @@ import world.deslauriers.repository.UserRepository;
 import world.deslauriers.repository.UserRoleRepository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -66,8 +65,13 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public Iterable<UserDto> getAllUsers(){
-        return userRepository.findAllUsers();
+    public Iterable<ProfileDto> getAllUsers(){
+
+        var users = userRepository.findAll();
+        var profiles = new ArrayList<ProfileDto>((int) users.spliterator().getExactSizeIfKnown());
+        users.forEach(user -> { profiles.add(buildProfile(user)); });
+
+       return profiles;
     }
 
     @Override
@@ -177,6 +181,9 @@ public class UserServiceImpl implements UserService{
 
     private ProfileDto buildProfile(User user){
 
+        var roles = new HashSet<Role>();
+        user.userRoles().forEach(userRole -> roles.add(userRole.role()));
+
         var addresses = new HashSet<Address>();
         user.userAddresses().forEach(userAddress -> addresses.add(userAddress.address()));
 
@@ -193,6 +200,7 @@ public class UserServiceImpl implements UserService{
                 user.enabled(),
                 user.accountExpired(),
                 user.accountLocked(),
+                roles,
                 addresses,
                 phones);
     }

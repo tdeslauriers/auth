@@ -14,7 +14,7 @@ public interface UserService {
 
     Optional<User> lookupUserByUsername(String email);
     Optional<User> lookupUserById(Long id);
-    Iterable<UserDto> getAllUsers();
+    Iterable<ProfileDto> getAllUsers();
 
     Optional<ProfileDto> getProfile(String username);
     Optional<ProfileDto> getProfileById(Long id);

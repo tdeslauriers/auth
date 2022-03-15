@@ -67,6 +67,7 @@ public class UserServiceTest {
                 user.enabled(),
                 user.accountExpired(),
                 user.accountLocked(),
+                null,
                 addresses,
                 phones));
 
@@ -86,6 +87,7 @@ public class UserServiceTest {
                 false,
                 user.accountExpired(),
                 user.accountLocked(),
+                null,
                 addresses,
                 null)); // needs id so putting null to avoid error
 
@@ -117,7 +119,7 @@ public class UserServiceTest {
 
 
         // find all
-        var all = userRepository.findAllUsers();
+        var all = userRepository.findAll();
         assertNotNull(all);
         assertTrue(all.iterator().hasNext());
         assertNotNull(all.iterator().next().id());
