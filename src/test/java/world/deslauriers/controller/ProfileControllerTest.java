@@ -129,7 +129,7 @@ public class ProfileControllerTest {
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
         updated = client.toBlocking().exchange(adminUpdateReq);
-        assertEquals(HttpStatus.NO_CONTENT, updated.getStatus());
+        assertEquals(HttpStatus.OK, updated.getStatus());
 
         // for fun: using logback not log4j2
         var jndi = HttpRequest.PUT("/profiles/edit", new ProfileDto(

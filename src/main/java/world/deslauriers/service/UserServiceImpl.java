@@ -116,15 +116,12 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void updateUser(User user, ProfileDto updatedProfile) {
+    public Optional<ProfileDto> updateUser(User user, ProfileDto updatedProfile) {
 
         var sb = new StringBuilder();
         try {
             // logging is placeholder for updating user field history table
-            // update username
-            if (!updatedProfile.username().equals(user.username())){
-                sb.append(user.username()).append(" --> ").append(updatedProfile.username()).append("\n");
-            }
+            // update username: not allowed, this will be done via email validation build
 
             // update firstname
             if (!updatedProfile.firstname().equals(user.firstname())){
@@ -177,6 +174,7 @@ public class UserServiceImpl implements UserService{
             log.error(e.getMessage());
             throw e;
         }
+        return getProfileById(user.id());
     }
 
     private ProfileDto buildProfile(User user){

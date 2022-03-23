@@ -43,6 +43,7 @@ public class ProfileController {
     @Get("/user")
     public Optional<ProfileDto> getProfile(Principal principal){
 
+        // may only get your own record.
         return userService.getProfile(principal.getName());
     }
 
@@ -56,6 +57,7 @@ public class ProfileController {
             return HttpResponse.status(HttpStatus.BAD_REQUEST).body("User does not exist.");
         }
 
+        // may only update your own record.
         userService.updateUser(allowed.get(), new ProfileDto(
                 allowed.get().id(),
                 allowed.get().username(),
@@ -65,7 +67,7 @@ public class ProfileController {
                 allowed.get().enabled(),
                 allowed.get().accountExpired(),
                 allowed.get().accountLocked(),
-                null,
+                updatedProfile.roles(),
                 updatedProfile.addresses(),
                 updatedProfile.phones()));
 
@@ -91,7 +93,7 @@ public class ProfileController {
 
     @Secured({"PROFILE_ADMIN"})
     @Put("/edit")
-    public HttpResponse updateUser(@Body @Valid ProfileDto updatedProfile){
+    public HttpResponse<ProfileDto> updateUser(@Body @Valid ProfileDto updatedProfile){
 
         var user = userService.lookupUserById(updatedProfile.id());
 
@@ -100,10 +102,10 @@ public class ProfileController {
             throw new IllegalArgumentException("Invalid user Id.");
         }
 
-        userService.updateUser(user.get(), updatedProfile);
+        var updated = userService.updateUser(user.get(), updatedProfile);
 
-        return HttpResponse
-                .noContent()
-                .header(HttpHeaders.LOCATION, URI.create("/profiles/" + updatedProfile.id()).getPath());
+
+        return HttpResponse.ok().body(updated.get());
+
     }
 }
