@@ -92,7 +92,10 @@ public class PhoneServiceImpl implements PhoneService {
                     .stream()
                     .filter(userPhone -> userPhone.phone().id().equals(phone.id()))
                     .findFirst().get().phone();
-            if (!previous.equals(phone)){
+
+            if (!previous.phone().equals(phone.phone()) ||
+                    !previous.type().equals(phone.type())){
+
                 var updated = phoneRepository.update(phone);
                 log.info("Updating " + user.username() + "'s phone " + previous + " to " + updated);
             }
