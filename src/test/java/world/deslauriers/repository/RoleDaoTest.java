@@ -13,20 +13,20 @@ public class RoleDaoTest {
     @Inject
     private RoleRepository roleRepository;
 
-    public RoleDaoTest(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
+    private static final String VALID_ROLE_1 = "GALLERY_READ";
+    private static final String VALID_ROLE_2 = "GALLERY_EDIT";
+    private static final String VALID_TITLE = "Gallery Read";
+    private static final String VALID_DESCRIPTION = "Navigate albums and view gallery content.";
 
     @Test
     void testRoleCrud(){
 
-        var role = roleRepository.save(new Role(null, "gallery_view", null));
+        var role = roleRepository.save(new Role(VALID_ROLE_1, VALID_TITLE, VALID_DESCRIPTION));
         assertNotNull(role.id());
 
-        var updated = roleRepository.update(new Role(role.id(), "gallery_edit", null));
+        var updated = roleRepository.update(new Role(role.id(), VALID_ROLE_2, VALID_TITLE, VALID_DESCRIPTION));
         assertEquals(role.id(), updated.id());
-        assertEquals("gallery_edit", updated.role());
-        assertNull(updated.userRoles());
+        assertEquals(VALID_ROLE_2, updated.role());
 
     }
 }

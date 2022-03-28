@@ -65,5 +65,13 @@ public class UserDaoTest {
 
 
     }
+
+    @Test
+    void testJoin(){
+
+        var user = userRepository.findByUsername("admin@deslauriers.world").get();
+        user = userRepository.findById(user.id()).get();
+        System.out.println(user);
+    }
 }
 

@@ -17,16 +17,18 @@ import java.util.Set;
 public record Role(
         @Id @GeneratedValue Long id,
         @NotNull @NotBlank @Size(min = 2, max = 32) String role,
+        @NotNull @NotBlank @Size(min = 2, max = 32) String title,
+        @NotNull @NotBlank @Size(min = 2, max = 64) String description,
 
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "role")
         @JoinTable(name = "user_role")
         Set<UserRole> userRoles
 ) {
-        public Role(String role) {
-                this(null, role, null);
+        public Role(String role, String title, String description) {
+                this(null, role, title, description, null);
         }
 
-        public Role(Long id, String role) {
-                this(id, role, null);
+        public Role(Long id, String role, String title, String description) {
+                this(id, role, title, description, null);
         }
 }

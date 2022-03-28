@@ -93,7 +93,7 @@ public class ProfileController {
 
     @Secured({"PROFILE_ADMIN"})
     @Put("/edit")
-    public HttpResponse<ProfileDto> updateUser(@Body @Valid ProfileDto updatedProfile){
+    public HttpResponse updateUser(@Body @Valid ProfileDto updatedProfile){
 
         var user = userService.lookupUserById(updatedProfile.id());
 
@@ -102,10 +102,6 @@ public class ProfileController {
             throw new IllegalArgumentException("Invalid user Id.");
         }
 
-        var updated = userService.updateUser(user.get(), updatedProfile);
-
-
-        return HttpResponse.ok().body(updated.get());
-
+        return HttpResponse.ok().body(userService.updateUser(user.get(), updatedProfile).get());
     }
 }

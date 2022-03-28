@@ -30,6 +30,8 @@ public class UserRoleDaoTest {
     private static final String VALID_FIRST = "tom";
     private static final String VALID_LAST = "deslauriers";
     private static final String VALID_ROLE_1 = "GALLERY_READ";
+    private static final String VALID_ROLE_TITLE = "General Admission";
+    private static final String VALID_ROLE_DESCRIPTION = "Site user.";
     private static final String VALID_ROLE_2 = "GALLERY_EDIT";
 
 
@@ -37,7 +39,7 @@ public class UserRoleDaoTest {
     void testUserRoleCrud(){
 
         // db records must exist prior to association in xref
-        var role = roleService.save(new Role(VALID_ROLE_1));
+        var role = roleService.save(new Role(VALID_ROLE_1, VALID_ROLE_TITLE, VALID_ROLE_DESCRIPTION));
         var user = userRepository.save(new User(
                 VALID_EMAIL, VALID_CLEAR_PASSWORD, VALID_FIRST, VALID_LAST, LocalDate.now(), true, false, false));
 
@@ -55,7 +57,7 @@ public class UserRoleDaoTest {
         assertEquals(VALID_ROLE_1, user.userRoles().stream().findFirst().get().role().role());
 
         // test add xref join via user record update
-        var ur2 = new UserRole(user, roleService.save(new Role(VALID_ROLE_2)));
+        var ur2 = new UserRole(user, roleService.save(new Role(VALID_ROLE_2, VALID_ROLE_TITLE, VALID_ROLE_DESCRIPTION)));
         ur2 = userRoleRepository.save(ur2);
 
         // id present, but user and roles null???

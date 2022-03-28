@@ -1,0 +1,2 @@
+ALTER TABLE role ADD COLUMN title VARCHAR(32) AFTER role;
+ALTER TABLE role ADD COLUMN description VARCHAR(64) AFTER title;
