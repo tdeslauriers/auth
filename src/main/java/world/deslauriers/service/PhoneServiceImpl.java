@@ -32,19 +32,43 @@ public class PhoneServiceImpl implements PhoneService {
     @Override
     public void resolvePhones(HashSet<Phone> phones, User user) {
 
+        // prep
+        var toResolve = new HashSet<Phone>();
+        phones.stream().filter(phone -> phone.id() == null).forEach(phone -> toResolve.add(phone));
+        phones.stream().filter(phone -> phone.id() != null).forEach(phone -> {
+            if (user.userPhones().stream().noneMatch(userPhone -> userPhone.phone().id().equals(phone.id()))){
+                log.error("Attempt to edit phone record user does not own: " + phone);
+                throw new IllegalArgumentException("Cannot edit phone record user does not own.");
+            }
+            toResolve.add(phone);
+        });
+        user.userPhones().forEach(userPhone -> {
+            if (toResolve
+                    .stream()
+                    .filter(phone -> phone.id() != null)
+                    .noneMatch(phone -> phone.id().equals(userPhone.id()))){
+
+                toResolve.add(userPhone.phone());
+            }
+        });
+
         // only 3 allowed
-        if (phones.size() > 3 ) {
-            log.error("Attempt to add more than 3 numbers");
+        if (toResolve.size() > 3) {
+            log.error("Attempt to add more than 3 numbers to record");
             throw new IllegalArgumentException("Only 3 phone numbers allowed.");
         }
 
-        // unique phone types
-        var types = new HashSet<String>();
-        phones.forEach(phone -> types.add(phone.type()));
-        if (types.size() < phones.size()) {
-            log.error("Attempt to enter duplicate phone type");
-            throw new IllegalArgumentException("Can only enter one of each type of phone.");
+        // cannot enter duplicate numbers
+        var numbers = new HashSet<String>();
+        toResolve.forEach(phone -> numbers.add(phone.phone()));
+        if(numbers.size() < toResolve.size()) {
+            log.error("Attempt to enter duplicate phone numbers");
+            throw new IllegalArgumentException("Cannot add duplicate phone numbers.");
         }
+
+        var types = new HashSet<String>();
+        toResolve.forEach(phone -> types.add(phone.type()));
+        user.userPhones().forEach(userPhone -> types.add(userPhone.phone().type()));
 
         // correct type check
         types.forEach(type -> {
@@ -56,99 +80,37 @@ public class PhoneServiceImpl implements PhoneService {
             }
         });
 
-        var current = userPhoneRepository.findByUser(user);
-        var sb = new StringBuilder();
-        phones.forEach(phone -> {
+        // unique phone types
+        if (types.size() < toResolve.size()) {
+            log.error("Attempt to enter duplicate phone type");
+            throw new IllegalArgumentException("Can only enter one of each type of phone.");
+        }
 
-            // user has phone(s)
-            if (current.iterator().hasNext()) {
-
-                // add additional phone(s)
-                if (phone.id() == null) {
-
-                    if (current.size() + 1 > 3) {
-                        log.error("Attempt to add more than 3 numbers");
-                        throw new IllegalArgumentException("Only 3 phone numbers allowed.");
-
-                    }
-                    // no duplicate numbers/types
-                    if (isDuplicatePhone(phone, current)) {
-                        log.error("Attempt to add duplicate number ( " + phone.phone() + " ) to " + user.username());
-                        throw new IllegalArgumentException("Duplicate number.");
-                    }
-                    if (isDuplicateType(phone, current)) {
-                        log.error("Attempt to add duplicate phone type ( " + phone.type() + " ) to " + user.username());
-                        throw new IllegalArgumentException("Duplicate type.");
-                    }
-
-                    current.add(associatePhone(phone, user));
-                    sb.append(" Adding ").append(phone.type().toLowerCase()).append(" phone - ").append(phone.phone());
-                }
-
-                // edit existing.
-                current.forEach(userPhone -> {
-                    var editCount = 0;
-
-                    if (phone.id() != null && phone.id().equals(userPhone.phone().id())){
-
-                        if (!phone.phone().equals(userPhone.phone().phone())){
-                            // no duplicate numbers/types
-                            if (isDuplicatePhone(phone, current)) {
-                                log.error("Attempt to add duplicate number ( " + phone.phone() + " ) to " + user.username());
-                                throw new IllegalArgumentException("Duplicate number.");
-                            }
-                            sb.append( "Updating ").append(phone.type().toLowerCase()).append(" phone: ").append(userPhone.phone().phone()).append(" --> ").append(phone.phone());
-                            editCount++;
-                        }
-                        if (!phone.type().equals(userPhone.phone().type())){
-
-                            if (isDuplicateType(phone, current)) {
-                                log.error("Attempt to add duplicate phone type ( " + phone.type() + " ) to " + user.username());
-                                throw new IllegalArgumentException("Duplicate type.");
-                            }
-                            sb.append( "Updating ").append(phone.phone()).append(" type: ").append(userPhone.phone().type().toLowerCase()).append(" --> ").append(phone.type());
-                            editCount++;
-                        }
-                        if (editCount > 0){
-                            phoneRepository.update(phone);
-                        }
-                    }
-                });
-            }
-
-            // user has no associated phones
-            if (!current.iterator().hasNext()) {
-
-                current.add(associatePhone(phone, user));
-                sb.append(" Adding ").append(phone.type().toLowerCase()).append(" phone - ").append(phone.phone()).append(" to ").append(user.username()).append("'s profile.");
+        // edit
+        toResolve.stream().filter(phone -> phone.id() != null).forEach(phone -> {
+            var previous = user.userPhones()
+                    .stream()
+                    .filter(userPhone -> userPhone.phone().id().equals(phone.id()))
+                    .findFirst().get().phone();
+            if (!previous.equals(phone)){
+                var updated = phoneRepository.update(phone);
+                log.info("Updating " + user.username() + "'s phone " + previous + " to " + updated);
             }
         });
-        if (sb.length() > 0) log.info("Updating " + user.username() + "'s phone(s): " + sb);
-    }
 
-    private UserPhone associatePhone(Phone phone, User user) {
-
-        var existing = phoneRepository.findByPhone(phone.phone());
-        return existing
-                .map(ph -> userPhoneRepository.save(new UserPhone(user, ph)))
-                .orElseGet(() -> userPhoneRepository.save(new UserPhone(user, phoneRepository.save(phone))));
-    }
-
-    private boolean isDuplicatePhone(Phone phone, Iterable<UserPhone> userPhones) {
-
-        for (UserPhone userPhone : userPhones) {
-            assert userPhone.phone() != null;
-            if (userPhone.phone().phone().equals(phone.phone())) return true;
+        // add
+        var total = user.userPhones().size();
+        var toAdd = toResolve.stream().filter(phone -> phone.id() == null).toList();
+        for (Phone p : toAdd) {
+            if (total >= 3){
+                log.error("Attempt to add more than three phones");
+                throw new IllegalArgumentException("Cannot add more than three phones.");
+            }
+            var added = phoneRepository.save(p);
+            var associated = userPhoneRepository.save(new UserPhone(user, added));
+            log.info("Associated new phone " + associated.phone() + " to user " + associated.user().username());
+            total++;
         }
-        return false;
     }
 
-    private boolean isDuplicateType(Phone phone, Iterable<UserPhone> userPhones){
-
-        for (UserPhone userPhone : userPhones) {
-            assert userPhone.phone() != null;
-            if (userPhone.phone().type().equals(phone.type())) return true;
-        }
-        return false;
-    }
 }

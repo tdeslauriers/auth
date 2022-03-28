@@ -44,8 +44,8 @@ public class UserServiceTest {
         var user = userRepository.save(new User(
                 VALID_EMAIL, passwordEncoderService.encode(VALID_CLEAR_PASSWORD), VALID_FIRST, VALID_LAST, LocalDate.now(), true, false, false));
 
-        var ur1 = userRoleRepository.save(new UserRole(user, roleService.save(new Role(VALID_ROLE_1))));
-        var ur2 = userRoleRepository.save(new UserRole(user, roleService.save(new Role(VALID_ROLE_2))));
+        var ur1 = userRoleRepository.save(new UserRole(user, roleService.save(new Role(VALID_ROLE_1, "Gallery Read", "disc"))));
+        var ur2 = userRoleRepository.save(new UserRole(user, roleService.save(new Role(VALID_ROLE_2, "Gallery Edit", "disc"))));
 
         user = userService.lookupUserByUsername(user.username()).get();
         assertNotNull(user);

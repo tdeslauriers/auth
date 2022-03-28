@@ -4,15 +4,14 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import world.deslauriers.model.database.Phone;
-import world.deslauriers.model.database.UserPhone;
 import world.deslauriers.repository.PhoneRepository;
 import world.deslauriers.repository.UserPhoneRepository;
 import world.deslauriers.repository.UserRepository;
-import world.deslauriers.service.constants.PhoneType;
 
-import java.util.*;
+import java.util.HashSet;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @MicronautTest
 public class PhoneServiceTest {
@@ -29,130 +28,102 @@ public class PhoneServiceTest {
     private static final String VALID_NEW_PHONE = "77788899999";
 
     @Test
-    void testPhoneServiceMethods(){
+    void testPhoneServiceMethods() {
 
         var user = userRepository.findByUsername(VALID_USER).get();
-        var userPhones = userPhoneRepository.findByUser(user);
-        var phones = new HashSet<Phone>(List.of(userPhones.iterator().next().phone()));
-        System.out.println(phones);
-        // do nothing if no changes
-        phoneService.resolvePhones(phones, user);
-        userPhones = userPhoneRepository.findByUser(user);
-        assertEquals(1, userPhones.size());
-        assertTrue(userPhones.stream().anyMatch(userPhone -> {
-            assert userPhone.phone() != null;
-            return Objects.equals(userPhone.phone().phone(), VALID_ASSOCIATED_PHONE);
-        }));
-        assertTrue(userPhones.stream().anyMatch(userPhone -> {
-            assert userPhone.phone() != null;
-            return Objects.equals(userPhone.phone().type(), "CELL");
-        }));
+        var current = user.userPhones();
 
-        // edit number(s) if does exist
-        var current = phones.iterator().next(); // get current
-        phones.clear();
-        phones.add(new Phone(current.id(), "1112224444", current.type()));
-        phoneService.resolvePhones(phones, user);
-        userPhones = userPhoneRepository.findByUser(user);
-        assertEquals(1, userPhones.size());
-        assertTrue(userPhones.stream().anyMatch(userPhone -> {
-            assert userPhone.phone() != null;
-            return Objects.equals(userPhone.phone().phone(), "1112224444");
-        }));
-        assertTrue(userPhones.stream().anyMatch(userPhone -> {
-            assert userPhone.phone() != null;
-            return Objects.equals(userPhone.phone().type(), "CELL");
-        }));
+        // cannot edit/add to invalid phone type
+        var badType = new Phone("5556667777", "MONKEY");
+        var updated = new HashSet<Phone>();
+        current.forEach(userPhone -> updated.add(userPhone.phone()));
+        updated.add(badType);
+        var thrown = assertThrows(IllegalArgumentException.class, () -> {
+            phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
+        });
+        assertEquals("Invalid phone type: MONKEY", thrown.getMessage());
 
-        // cannot add duplicate phone number
-        phones.add(new Phone("1112224444", "WORK"));
-        assertThrows(IllegalArgumentException.class, () -> {
-            phoneService.resolvePhones(phones, user);
+        // clean up
+        updated.remove(badType);
+
+        // cannot add duplicates or two of same number
+        var duplicate = new Phone(VALID_ASSOCIATED_PHONE, "HOME");
+        updated.add(duplicate);
+        thrown = assertThrows(IllegalArgumentException.class, () -> {
+            phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
+        });
+        assertEquals("Cannot add duplicate phone numbers.", thrown.getMessage());
+
+        // clean up
+        updated.remove(duplicate);
+
+        // cannot update numbers user does not own.
+        var notOwned = phoneRepository.findByPhone(VALID_UNASSOCIATED_PHONE).get();
+        notOwned = new Phone(notOwned.id(), "55555555555", notOwned.type());
+        updated.add(notOwned);
+        thrown = assertThrows(IllegalArgumentException.class, () -> {
+            phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
+        });
+        assertEquals("Cannot edit phone record user does not own.", thrown.getMessage());
+
+        // clean up
+        updated.remove(notOwned);
+
+        // happy path > user owns edited record
+        updated.clear();
+        var legit = new Phone(
+                user.userPhones()
+                        .stream()
+                        .filter(userPhone -> userPhone.phone().phone().equals(VALID_ASSOCIATED_PHONE))
+                        .findFirst().get().id(),
+                "2223334444",
+                "HOME");
+        updated.add(legit);
+        phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
+
+        // happy path: user has less than three numbers.
+        updated.add(new Phone("7778889999", "CELL"));
+        updated.add(new Phone("3334445555", "WORK"));
+        phoneService.resolvePhones(updated, user);
+        assertEquals(3, userRepository.findByUsername(VALID_USER).get().userPhones().size());
+
+        // must not be able to add more than 3 phones.
+        updated.clear();
+        updated.add(new Phone("9998887777", "CELL"));
+        thrown = assertThrows(IllegalArgumentException.class, () -> {
+            phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
         });
 
-        // add new if different from existing
-        // look up before add new phone to db
-        phones.clear();
-        userPhones = userPhoneRepository.findByUser(user);
-        phones.add(userPhones.stream().filter(userPhone -> userPhone.phone().phone().equals("1112224444")).findFirst().get().phone());
-        phones.add(new Phone(VALID_UNASSOCIATED_PHONE, PhoneType.WORK.toString()));
-        phoneService.resolvePhones(phones, user);
-        userPhones = userPhoneRepository.findByUser(user);
-        assertEquals(2, userPhones.size());
-        assertTrue(userPhones.stream().anyMatch(userPhone -> {
-            assert userPhone.phone() != null;
-            return Objects.equals(userPhone.phone().phone(), "1112224444");
-        }));
-        assertTrue(userPhones.stream().anyMatch(userPhone -> {
-            assert userPhone.phone() != null;
-            return Objects.equals(userPhone.phone().phone(), VALID_UNASSOCIATED_PHONE);
-        }));
+        // must not be allowed to add more than one of each type.
+        var remove = userRepository
+                .findByUsername(VALID_USER).get()
+                .userPhones()
+                .stream()
+                .filter(userPhone -> userPhone.phone().type().equals("WORK"))
+                .findFirst().get();
+        userPhoneRepository.delete(remove);
+        assertEquals(2, userRepository.findByUsername(VALID_USER).get().userPhones().size());
 
-        // only one of each type: cell, work, home
-        phones.add(new Phone(VALID_NEW_PHONE, "CELL"));
-        var thrown = assertThrows(IllegalArgumentException.class, () -> {
-            phoneService.resolvePhones(phones, user);
+        // cell exists in set, trying to add again in open slot
+        updated.clear();
+        updated.add(new Phone("5553334444", "CELL"));
+        thrown = assertThrows(IllegalArgumentException.class, () -> {
+            phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
         });
         assertEquals("Can only enter one of each type of phone.", thrown.getMessage());
 
-        // add up to three numbers
-
-        phones.clear();
-        phones.add(new Phone(VALID_NEW_PHONE, "HOME"));
-        phoneService.resolvePhones(phones, user);
-        userPhones = userPhoneRepository.findByUser(user);
-        assertEquals(3, userPhones.size());
-        phones.clear();
-        phones.add(new Phone("1231231234", "HOME"));
-        thrown = assertThrows(IllegalArgumentException.class, () -> {
-            phoneService.resolvePhones(phones, user);
-        });
-        assertEquals("Only 3 phone numbers allowed.", thrown.getMessage());
-
-        // phone types must be valid
-        userPhoneRepository.findByUser(user).forEach(userPhone -> userPhoneRepository.delete(userPhone));
-        assertEquals(0, userPhoneRepository.findByUser(user).size());
-        phones.add(new Phone(VALID_NEW_PHONE, "FOUR"));
-        thrown = assertThrows(IllegalArgumentException.class, () -> {
-            phoneService.resolvePhones(phones, user);
-        });
-        assertEquals("Invalid phone type: FOUR", thrown.getMessage());
-
-        // add if no phone exists
-        userPhoneRepository.findByUser(user).forEach(userPhone -> userPhoneRepository.delete(userPhone));
-        assertEquals(0, userPhoneRepository.findByUser(user).size());
-        phones.clear();
-        phones.add(new Phone(VALID_NEW_PHONE, "HOME"));
-        phoneService.resolvePhones(phones, user);
-        assertEquals(1, userPhoneRepository.findByUser(user).size());
+        // ensure incomplete add update does not result in error
+        // only one of 2 existing phone records included below
+        updated.clear();
+        updated.add(userRepository
+                .findByUsername(VALID_USER).get()
+                .userPhones()
+                .stream()
+                .filter(userPhone -> userPhone.phone().type().equals("HOME"))
+                .findFirst().get().phone());
+        updated.add(new Phone("7777778888", "WORK"));
+        phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
+        assertEquals(3, userRepository.findByUsername(VALID_USER).get().userPhones().size());
     }
 
-    @Test
-    void testRoughDraft(){
-
-        var user = userRepository.findByUsername(VALID_USER).get();
-        var current = userPhoneRepository.findByUser(user);
-        var currentCount = current.spliterator().getExactSizeIfKnown();
-        assertEquals(1, currentCount);
-
-        var associate = userPhoneRepository.save(
-                new UserPhone(user, phoneRepository.findByPhone(VALID_UNASSOCIATED_PHONE).get()));
-        current = userPhoneRepository.findByUser(userRepository.findByUsername(VALID_USER).get());
-        assertEquals(2, current.spliterator().getExactSizeIfKnown());
-
-        var types = new HashSet<String>();
-        current.forEach(userPhone -> types.add(userPhone.phone().type()));
-        assertEquals(2, types.size());
-
-        associate = userPhoneRepository.save(
-                new UserPhone(user, phoneRepository.save(new Phone("7778889999", "FOOD"))));
-        current = userPhoneRepository.findByUser(userRepository.findByUsername(VALID_USER).get());
-        assertEquals(3, current.spliterator().getExactSizeIfKnown());
-
-        current.forEach(userPhone -> types.add(userPhone.phone().type()));
-        assertEquals(3, types.size());
-
-        assertEquals("WORK".toUpperCase(), PhoneType.WORK.toString());
-
-    }
 }

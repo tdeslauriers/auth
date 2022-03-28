@@ -14,19 +14,19 @@ public class RoleServiceTest {
     private RoleService roleService;
 
     private static final String VALID_ROLE = "GENERAL_ADMISSION";
+    private static final String VALID_ROLE_TITLE = "General Admission";
+    private static final String VALID_ROLE_DESCRIPTION = "Site user.";
     private static final String INVALID_ROLE = "FAKE_ROLE";
 
     @Test
     void testRoleServiceMethods(){
 
-        roleService.save(new Role(VALID_ROLE));
+        var role = roleService.save(new Role(VALID_ROLE, VALID_ROLE_TITLE, VALID_ROLE_DESCRIPTION));
+        assertNotNull(role.id());
+        assertEquals(VALID_ROLE, role.role());
+        assertEquals(VALID_ROLE_TITLE, role.title());
+        assertEquals(VALID_ROLE_DESCRIPTION, role.description());
 
-        var role = roleService.getRole(VALID_ROLE);
-        assertTrue(role.isPresent());
-        assertNotNull(role.get().id());
-        assertEquals(VALID_ROLE, role.get().role());
 
-        role = roleService.getRole(INVALID_ROLE);
-        assertTrue(role.isEmpty());
     }
 }
