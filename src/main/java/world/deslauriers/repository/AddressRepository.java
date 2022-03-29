@@ -11,6 +11,4 @@ import java.util.Optional;
 @JdbcRepository(dialect = Dialect.MYSQL)
 public interface AddressRepository extends PageableRepository<Address, Long> {
 
-    @Query("SELECT * FROM address WHERE address = :address AND city = :city AND state = :state AND zip = :zip")
-    Optional<Address> findByAddress(String address, String city, String state, String zip);
 }

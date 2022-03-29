@@ -28,35 +28,17 @@ public class AddressServiceTest {
 
         // from test data
         var user = userService.lookupUserByUsername("admin@deslauriers.world").get();
-        var userAddresses = userAddressRepository.findByUser(user);
-        assertTrue(userAddresses.iterator().hasNext());
-        assertEquals(1, ((Collection<?>) userAddresses).size());
-
-        var address = addressRepository.findByAddress(
-                userAddresses.iterator().next().address().address(),
-                userAddresses.iterator().next().address().city(),
-                userAddresses.iterator().next().address().state(),
-                userAddresses.iterator().next().address().zip());
-        assertTrue(address.isPresent());
+        var current = addressRepository.findById(user.userAddresses().iterator().next().id()).get();
 
         // edit existing
         var addresses = new HashSet<Address>();
-        addresses.add(new Address(
-                userAddresses.iterator().next().id(),
-                "111 New Address Street",
-                userAddresses.iterator().next().address().city(),
-                userAddresses.iterator().next().address().state(),
-                userAddresses.iterator().next().address().zip()));
+        addresses.add(new Address(current.id(), "111 New Address Street", current.city(), current.state(), current.zip()));
         addressService.resolveAddresses(addresses, user);
-        userAddresses = userAddressRepository.findByUser(user);
+        var userAddresses = userAddressRepository.findByUser(user);
         assertEquals(1, ((Collection<?>) userAddresses).size());
-        userAddresses.forEach(userAddress -> System.out.println(userAddress.address()));
-        assertEquals("111 New Address Street", ((Collection<UserAddress>) userAddresses)
-                .stream()
-                .filter(userAddress -> userAddress.address().address().equals("111 New Address Street"))
-                .findFirst().get().address().address());
+        assertEquals("111 New Address Street", userAddresses.iterator().next().address().address());
 
-        // must fail to add more than one address.
+        // must fail to add more than one address at input.
         addresses.add(new Address("789 Condo Lane", "Cityopolis", "DC", "33333"));
         var thrown = assertThrows(IllegalArgumentException.class, () ->{
             addressService.resolveAddresses(addresses, user);
@@ -69,37 +51,36 @@ public class AddressServiceTest {
         thrown = assertThrows(IllegalArgumentException.class, () -> {
             addressService.resolveAddresses(addresses, user);
         });
-        assertEquals("Address record exists. Cannot add new. Edit existing record.",
-                    thrown.getMessage());
+        assertEquals("Address record exists. Cannot add new. Edit existing record.", thrown.getMessage());
+
+        // clear xrefs
+        userAddresses.forEach(userAddress -> userAddressRepository.delete(userAddress));
+        assertFalse(userAddressRepository.findByUser(user).iterator().hasNext());
+
+        // must not add existing/possible record (has id) to user
+        addresses.clear();
+        addresses.add(current);
+        thrown = assertThrows(IllegalArgumentException.class, () -> {
+            addressService.resolveAddresses(addresses, userService.lookupUserByUsername("admin@deslauriers.world").get());
+        });
+        assertEquals("Cannot add possible existing record.", thrown.getMessage());
+
+        addresses.clear();
 
         // add new address
-        // first need to clear xrefs
-        userAddresses.forEach(userAddress -> userAddressRepository.delete(userAddress));
-        userAddresses = userAddressRepository.findByUser(user);
-        assertFalse(userAddresses.iterator().hasNext());
         addresses.add(new Address("789 Condo Lane", "Cityopolis", "DC", "33333"));
-        addressService.resolveAddresses(addresses, user);
+        addressService.resolveAddresses(addresses, userService.lookupUserByUsername("admin@deslauriers.world").get());
 
-        // must check for existing address before adding address record:
-        userAddressRepository
-                .findByUser(user)
-                .forEach(userAddress -> userAddressRepository.delete(userAddress));
-        userAddresses = userAddressRepository.findByUser(user);
-        userAddresses.forEach(userAddress -> System.out.println("Testing:" + userAddress));
-        assertFalse(userAddresses.iterator().hasNext());
+        // must not allow edit of record that user does not own:
         addresses.clear();
-        var existing = addressService.getByAddress("789 Condo Lane", "Cityopolis", "DC", "33333");
-        assertTrue(existing.isPresent());
-        addresses.add(existing.get());
-        addressService.resolveAddresses(addresses, user);
-        userAddresses = userAddressRepository.findByUser(user);
-        userAddresses.forEach(userAddress -> {
-           if (userAddress.address().address().equals("789 Condo Lane")){
-               assertEquals(existing.get().id(), userAddress.address().id());
-            }
+        addresses.add(new Address(2L, current.address(), current.city(), current.state(), current.zip()));
+        thrown = assertThrows(IllegalArgumentException.class, () -> {
+            addressService.resolveAddresses(addresses, userService.lookupUserByUsername("admin@deslauriers.world").get());
         });
+        assertEquals("Can only edit record user owns.", thrown.getMessage());
 
         // fail validation
+        // happens prior to service firing.
         userAddressRepository
                 .findByUser(user)
                 .forEach(userAddress -> userAddressRepository.delete(userAddress));
@@ -107,7 +88,7 @@ public class AddressServiceTest {
         addresses.add(new Address("", "Nowheresville", "DC", "33333"));
 
         var fail = assertThrows(ConstraintViolationException.class, () -> {
-            addressService.resolveAddresses(addresses, user);
+            addressService.resolveAddresses(addresses, userService.lookupUserByUsername("admin@deslauriers.world").get());
         });
         assertEquals("save.entity.address: must not be blank", fail.getMessage());
     }

@@ -30,102 +30,45 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public Optional<Address> getByAddress(String address, String city, String state, String zip){
-        return addressRepository.findByAddress(address, city, state, zip);
-    }
-
-    @Override
     public void resolveAddresses(HashSet<Address> addresses, User user) {
 
         // only allowed to add one or edit one
-        if (addresses.size() > 1) throw new IllegalArgumentException("Can only add/edit one address.");
-
-        // check if user has address
-        var userAddresses = userAddressRepository.findByUser(user);
+        if (addresses.size() > 1){
+            log.error("Attempt to add more than one address to user " + user.username());
+            throw new IllegalArgumentException("Can only add/edit one address.");
+        }
 
         // user has no address
-        if (!userAddresses.iterator().hasNext()){
-            if(addresses.stream().findFirst().isPresent()){
-                linkUserToAddress(addresses.stream().findFirst().get(), user);
+        if (!user.userAddresses().iterator().hasNext()){
+
+            // cannot add existing record to user
+            if (addresses.iterator().next().id() != null){
+                log.error("Cannot add existing or possible existing record: " + addresses.iterator().next());
+                throw new IllegalArgumentException("Cannot add possible existing record.");
             }
+
+            var userAddress = userAddressRepository.save(
+                    new UserAddress(user, addressRepository.save(addresses.iterator().next())));
+            log.info("Added address " + userAddress.address() + " to " + user.username());
         }
 
         // user has address
-        if (userAddresses.iterator().hasNext() &&
-            addresses.stream().findFirst().isPresent()){
+        if (user.userAddresses().iterator().hasNext()){
 
-            if (addresses.stream().findFirst().get().id() == null){
+            // cannot add if address exists
+            if (addresses.iterator().next().id() == null){
+                log.error("Attempt to add additional address " + addresses.iterator().next() + " to user " + user.username());
                 throw new IllegalArgumentException("Address record exists. Cannot add new. Edit existing record.");
             }
 
-            var sb = new StringBuilder();
-            // no adding; take id from existing
-            var updated = userAddresses.iterator().next().address();
-            if (!addresses.stream().findFirst().get().address().equals(updated.address())){
-                sb
-                        .append("\nUpdating address:")
-                        .append(updated.id())
-                        .append("'s street address: ")
-                        .append(updated.address())
-                        .append(" --> ")
-                        .append(addresses.iterator().next().address());
+            // user must own record being edited
+            if (!addresses.iterator().next().id().equals(user.userAddresses().iterator().next().address().id())){
+                log.error("Attempt to edit address " + addresses.iterator().next() + " that isn't owned by user " + user.username());
+                throw new IllegalArgumentException("Can only edit record user owns.");
             }
-            if (!addresses.stream().findFirst().get().city().equals(updated.city())){
-                sb
-                        .append("\nUpdating address:")
-                        .append(updated.id())
-                        .append("'s street address: ")
-                        .append(updated.city())
-                        .append(" --> ")
-                        .append(addresses.iterator().next().city());
-            }
-            if (!addresses.stream().findFirst().get().state().equals(updated.state())){
-                sb
-                        .append("\nUpdating address:")
-                        .append(updated.id())
-                        .append("'s street address: ")
-                        .append(updated.state())
-                        .append(" --> ")
-                        .append(addresses.iterator().next().state());
-            }
-            if (!addresses.stream().findFirst().get().zip().equals(updated.zip())){
-                sb
-                        .append("\nUpdating address:")
-                        .append(updated.id())
-                        .append("'s street address: ")
-                        .append(updated.zip())
-                        .append(" --> ")
-                        .append(addresses.iterator().next().zip());
-            }
-            if (sb.length() > 0) {
-                updated = addressRepository.update(new Address(
-                        updated.id(),
-                        addresses.stream().findFirst().get().address(),
-                        addresses.stream().findFirst().get().city(),
-                        addresses.stream().findFirst().get().state(),
-                        addresses.stream().findFirst().get().zip()));
-                log.info("Updating " + user.username() + "'s address:" + sb.toString());
-            }
-        }
-    }
 
-    private void linkUserToAddress(Address address, User user){
-
-        var lookupAddress = addressRepository.findByAddress(
-                address.address(),
-                address.city(),
-                address.state(),
-                address.zip());
-
-        if (lookupAddress.isEmpty()){
-            var linkedAddress = userAddressRepository.save(new UserAddress(user, addressRepository.save(address)));
-            log.info("Created new address: " + linkedAddress.address());
-            log.info(user.id() + ":" + user.username() + " associated to: " + linkedAddress.address());
-        }
-
-        if (lookupAddress.isPresent()){
-            var linkedAddress = userAddressRepository.save(new UserAddress(user, lookupAddress.get()));
-            log.info(user.id() + ":" + user.username() + " associated to: " + linkedAddress.address());
+            var updated = addressRepository.update(addresses.iterator().next());
+            log.info("Updated " + user.userAddresses().iterator().next().address() + " to " + updated + "on user " + user.username());
         }
     }
 }

@@ -9,7 +9,5 @@ import java.util.Optional;
 
 public interface AddressService {
 
-    Optional<Address> getByAddress(String address, String city, String state, String zip);
-
     void resolveAddresses(HashSet<Address> addresses, User user);
 }
