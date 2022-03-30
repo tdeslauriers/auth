@@ -11,6 +11,8 @@ public interface RoleService {
 
     Optional<Role> getRole(String role);
 
+    Optional<Role> getById(Long id);
+
     Iterable<Role> getAllRoles();
 
     Role update(Role role);
