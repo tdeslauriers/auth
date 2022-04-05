@@ -30,5 +30,7 @@ public class UserPhoneDaoTest {
         assertTrue(StreamSupport
                 .stream(userphones.spliterator(), false)
                 .anyMatch(userPhone -> userPhone.phone().phone().equals(VALID_PHONE)));
+
+        userphones.forEach(System.out::println);
     }
 }

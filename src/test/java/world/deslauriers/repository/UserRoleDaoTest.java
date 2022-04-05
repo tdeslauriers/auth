@@ -8,10 +8,10 @@ import world.deslauriers.model.database.User;
 import world.deslauriers.model.database.UserRole;
 import world.deslauriers.service.RoleService;
 
+import javax.validation.constraints.AssertTrue;
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest
 public class UserRoleDaoTest {
@@ -61,7 +61,8 @@ public class UserRoleDaoTest {
         ur2 = userRoleRepository.save(ur2);
 
         // id present, but user and roles null???
-        var userroles = userRoleRepository.findAll();
+        var userrole = userRoleRepository.findByUserAndRole(user, role);
+        System.out.println(userrole);
 
 
 

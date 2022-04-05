@@ -170,6 +170,10 @@ public class UserServiceImpl implements UserService{
                 phoneService.resolvePhones(updatedProfile.phones(), user);
             }
 
+            if (updatedProfile.roles() != null){
+                roleService.resolveRoles(updatedProfile.roles(), user);
+            }
+
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage());
             throw e;

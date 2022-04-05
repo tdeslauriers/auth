@@ -6,7 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import world.deslauriers.model.database.Role;
 import world.deslauriers.model.database.User;
+import world.deslauriers.model.database.UserRole;
 import world.deslauriers.repository.RoleRepository;
+import world.deslauriers.repository.UserRoleRepository;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -19,8 +21,12 @@ public class RoleServiceImpl implements RoleService {
     @Inject
     private final RoleRepository roleRepository;
 
-    public RoleServiceImpl(RoleRepository roleRepository) {
+    @Inject
+    private final UserRoleRepository userRoleRepository;
+
+    public RoleServiceImpl(RoleRepository roleRepository, UserRoleRepository userRoleRepository) {
         this.roleRepository = roleRepository;
+        this.userRoleRepository = userRoleRepository;
     }
 
     @Override
@@ -62,6 +68,28 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public void resolveRoles(HashSet<Role> roles, User user){
 
-        var current = user.userRoles();
+        // add any UserRoles the old set does not contain
+        roles.forEach(role -> {
+            if (user.userRoles().stream().noneMatch(userRole -> userRole.role().id().equals(role.id()))){
+                var exists = roleRepository.findById(role.id());
+                if (exists.isEmpty()){
+                    log.error("Attempt to add non-existent role to " + user.username());
+                    throw new IllegalArgumentException("Role does not exist");
+                }
+                userRoleRepository.save(new UserRole(user, exists.get()));
+                log.info("Added role " + exists.get().title() + " to " + user.username());
+            }
+        });
+
+        // remove any UserRoles the new set does not contain.
+        user.userRoles().forEach(userRole -> {
+            if (roles.stream().noneMatch(role -> role.id().equals(userRole.role().id()))){
+                var exists = userRoleRepository.findByUserAndRole(user, userRole.role());
+                if (exists.isPresent()){
+                    userRoleRepository.delete(exists.get());
+                    log.info("Removed role " + userRole.role() + " from user " + user.username());
+                }
+            }
+        });
     }
 }
