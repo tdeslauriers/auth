@@ -32,6 +32,14 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public void resolveAddresses(HashSet<Address> addresses, User user) {
 
+        // remove address
+        if (addresses.size() == 0){
+            user.userAddresses().forEach(userAddress -> {
+                userAddressRepository.delete(userAddress);
+                addressRepository.delete(userAddress.address());
+            });
+        }
+
         // only allowed to add one or edit one
         if (addresses.size() > 1){
             log.error("Attempt to add more than one address to user " + user.username());
@@ -39,7 +47,8 @@ public class AddressServiceImpl implements AddressService {
         }
 
         // user has no address
-        if (!user.userAddresses().iterator().hasNext()){
+        if (addresses.iterator().hasNext() && !user.userAddresses().iterator().hasNext()){
+
 
             // cannot add existing record to user
             if (addresses.iterator().next().id() != null){
@@ -53,7 +62,7 @@ public class AddressServiceImpl implements AddressService {
         }
 
         // user has address
-        if (user.userAddresses().iterator().hasNext()){
+        if (addresses.iterator().hasNext() && user.userAddresses().iterator().hasNext()){
 
             // cannot add if address exists
             if (addresses.iterator().next().id() == null){
@@ -70,5 +79,6 @@ public class AddressServiceImpl implements AddressService {
             var updated = addressRepository.update(addresses.iterator().next());
             log.info("Updated " + user.userAddresses().iterator().next().address() + " to " + updated + "on user " + user.username());
         }
+
     }
 }

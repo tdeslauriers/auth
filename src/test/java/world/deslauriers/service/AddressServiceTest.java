@@ -9,6 +9,7 @@ import world.deslauriers.repository.AddressRepository;
 import world.deslauriers.repository.UserAddressRepository;
 
 import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -23,11 +24,13 @@ public class AddressServiceTest {
     @Inject private UserService userService;
     @Inject private UserAddressRepository userAddressRepository;
 
+    private static final String VALID_EMAIL = "admin@deslauriers.world"; // test data
+
     @Test
     void testAddressServiceMethods(){
 
         // from test data
-        var user = userService.lookupUserByUsername("admin@deslauriers.world").get();
+        var user = userService.lookupUserByUsername(VALID_EMAIL).get();
         var current = addressRepository.findById(user.userAddresses().iterator().next().id()).get();
 
         // edit existing
@@ -91,6 +94,13 @@ public class AddressServiceTest {
             addressService.resolveAddresses(addresses, userService.lookupUserByUsername("admin@deslauriers.world").get());
         });
         assertEquals("save.entity.address: must not be blank", fail.getMessage());
+
+        // empty array should delete xref and delete record.
+        addresses.clear();
+        addressService.resolveAddresses(addresses, user);
+        assertFalse(userService.lookupUserByUsername(VALID_EMAIL).get().userAddresses().iterator().hasNext());
+        assertEquals(0, userService.lookupUserByUsername(VALID_EMAIL).get().userAddresses().size());
+
     }
 
 }
