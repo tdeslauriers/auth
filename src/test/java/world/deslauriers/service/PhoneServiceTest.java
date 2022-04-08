@@ -9,9 +9,9 @@ import world.deslauriers.repository.UserPhoneRepository;
 import world.deslauriers.repository.UserRepository;
 
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @MicronautTest
 public class PhoneServiceTest {
@@ -58,16 +58,16 @@ public class PhoneServiceTest {
         updated.remove(duplicate);
 
         // cannot update numbers user does not own.
+        // will be dropped by filtering
         var notOwned = phoneRepository.findByPhone(VALID_UNASSOCIATED_PHONE).get();
-        notOwned = new Phone(notOwned.id(), "55555555555", notOwned.type());
-        updated.add(notOwned);
-        thrown = assertThrows(IllegalArgumentException.class, () -> {
-            phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
-        });
-        assertEquals("Cannot edit phone record user does not own.", thrown.getMessage());
+        // edit not owned
+        var notOwnedEdit = new Phone(notOwned.id(), "9998882222", notOwned.type());
+        updated.add(notOwnedEdit);
+        phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
+        assertEquals(notOwned.phone(), phoneRepository.findByPhone(VALID_UNASSOCIATED_PHONE).get().phone());
 
         // clean up
-        updated.remove(notOwned);
+        updated.remove(notOwnedEdit);
 
         // happy path > user owns edited record
         updated.clear();
@@ -89,10 +89,13 @@ public class PhoneServiceTest {
 
         // must not be able to add more than 3 phones.
         updated.clear();
+        userRepository.findByUsername(VALID_USER).get().userPhones().forEach(userPhone -> updated.add(userPhone.phone()));
         updated.add(new Phone("9998887777", "CELL"));
+        assertTrue(updated.size() > 3);
         thrown = assertThrows(IllegalArgumentException.class, () -> {
             phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
         });
+        assertEquals("Only 3 phone numbers allowed.", thrown.getMessage());
 
         // must not be allowed to add more than one of each type.
         var remove = userRepository
@@ -104,26 +107,29 @@ public class PhoneServiceTest {
         userPhoneRepository.delete(remove);
         assertEquals(2, userRepository.findByUsername(VALID_USER).get().userPhones().size());
 
-        // cell exists in set, trying to add again in open slot
+        // must not enter duplicate types.
         updated.clear();
+        updated.add(new Phone("6668889999", "CELL"));
         updated.add(new Phone("5553334444", "CELL"));
         thrown = assertThrows(IllegalArgumentException.class, () -> {
             phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
         });
         assertEquals("Can only enter one of each type of phone.", thrown.getMessage());
 
-        // ensure incomplete add update does not result in error
-        // only one of 2 existing phone records included below
+        // deletion must occur when number not included in resolution payload
         updated.clear();
-        updated.add(userRepository
-                .findByUsername(VALID_USER).get()
-                .userPhones()
+        userRepository.findByUsername(VALID_USER).get().userPhones().forEach(userPhone -> updated.add(userPhone.phone()));
+        var deleted = userRepository.findByUsername(VALID_USER).get().userPhones()
                 .stream()
-                .filter(userPhone -> userPhone.phone().type().equals("HOME"))
-                .findFirst().get().phone());
-        updated.add(new Phone("7777778888", "WORK"));
+                .filter(userPhone -> userPhone.phone().type().equals("CELL"))
+                .findFirst().get().phone();
+        updated.remove(deleted);
         phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
-        assertEquals(3, userRepository.findByUsername(VALID_USER).get().userPhones().size());
+        var removed = userRepository.findByUsername(VALID_USER).get().userPhones()
+                .stream()
+                .noneMatch(userPhone -> userPhone.phone().id().equals(deleted.id()));
+        assertTrue(removed);
+        userRepository.findByUsername(VALID_USER).get().userPhones().forEach(userPhone -> System.out.println(userPhone.phone()));
     }
 
 }
