@@ -57,7 +57,7 @@ public class PasswordInterceptor implements ConstraintValidator<PasswordComplexi
                 .getMessages(result)
                 .stream()
                 .collect(Collectors.joining(". ")));
-        log.warn("Weak password/rule breaking password attempt");
+        log.warn("Weak password/rule-breaking password entry.");
 
         return false;
     }
