@@ -10,14 +10,11 @@ import io.micronaut.http.annotation.Put;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
-import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.rules.SecurityRule;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import world.deslauriers.model.profile.ProfileDto;
-import world.deslauriers.model.profile.UserDto;
-import world.deslauriers.model.registration.RegistrationResponseDto;
 import world.deslauriers.service.UserService;
 
 import javax.validation.Valid;
