@@ -1,25 +1,28 @@
 package world.deslauriers.validation;
 
+
 import io.micronaut.core.annotation.AnnotationValue;
 import io.micronaut.validation.validator.constraints.ConstraintValidator;
 import io.micronaut.validation.validator.constraints.ConstraintValidatorContext;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import world.deslauriers.validation.constants.State;
+import world.deslauriers.validation.constants.PhoneType;
+
+
 
 @Singleton
-public class UsStateInterceptor implements ConstraintValidator<UsState, String> {
+public class ValidPhoneTypeInterceptor implements ConstraintValidator<ValidPhoneType, String> {
 
     private static final Logger log = LoggerFactory.getLogger(UsStateInterceptor.class);
 
     @Override
-    public boolean isValid(String state, AnnotationValue<UsState> annotationMetadata, ConstraintValidatorContext context) {
+    public boolean isValid(String type, AnnotationValue<ValidPhoneType> annotationMetadata, ConstraintValidatorContext context) {
 
-        for (State s: State.values()) if (state.equals(s.toString())) return true;
+        for (PhoneType t: PhoneType.values()) if (type.toUpperCase().equals(t.toString())) return true;
 
-        context.messageTemplate("Incorrect US state abbreviation.");
-        log.error("Attempt to enter incorrect US state abbreviation: " + context.getRootBean());
+        context.messageTemplate("Incorrect phone type.");
+        log.error("Attempt to enter incorrect phone type: " + context.getRootBean());
         return false;
     }
 

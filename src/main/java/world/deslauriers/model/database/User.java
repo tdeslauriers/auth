@@ -5,6 +5,7 @@ import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.data.annotation.*;
 import io.micronaut.data.jdbc.annotation.JoinTable;
+import world.deslauriers.validation.LettersOnly;
 import world.deslauriers.validation.PasswordComplexity;
 
 import javax.validation.constraints.Email;
@@ -20,8 +21,8 @@ public record User(
         @Id @GeneratedValue Long id,
         @NonNull @NotBlank @Email @Size(max = 255) String username,
         @NonNull @NotBlank @PasswordComplexity String password,
-        @NonNull @NotBlank @Size(min = 1, max = 32)String firstname,
-        @NonNull @NotBlank @Size(min = 1, max = 32)String lastname,
+        @NonNull @NotBlank @LettersOnly @Size(min = 1, max = 32)String firstname,
+        @NonNull @NotBlank @LettersOnly @Size(min = 1, max = 32)String lastname,
         @DateCreated @NotNull LocalDate dateCreated,
         @NotNull Boolean enabled,
         @NotNull Boolean accountExpired,

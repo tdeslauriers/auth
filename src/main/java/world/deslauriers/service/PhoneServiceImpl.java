@@ -9,7 +9,7 @@ import world.deslauriers.model.database.User;
 import world.deslauriers.model.database.UserPhone;
 import world.deslauriers.repository.PhoneRepository;
 import world.deslauriers.repository.UserPhoneRepository;
-import world.deslauriers.service.constants.PhoneType;
+import world.deslauriers.validation.constants.PhoneType;
 
 import java.util.HashSet;
 import java.util.stream.Collectors;
@@ -76,16 +76,6 @@ public class PhoneServiceImpl implements PhoneService {
             log.error("Attempt to enter duplicate phone type");
             throw new IllegalArgumentException("Can only enter one of each type of phone.");
         }
-
-        // correct type check
-        types.forEach(type -> {
-            var valid = false;
-            for (PhoneType pt: PhoneType.values()) if (type.toUpperCase().equals(pt.toString())) valid = true;
-            if (!valid){
-                log.error("Attempt to enter invalid type: " + type);
-                throw new IllegalArgumentException("Invalid phone type: " + type);
-            }
-        });
 
         // update database
         var resolved = new HashSet<Phone>();

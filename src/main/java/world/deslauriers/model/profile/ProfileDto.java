@@ -5,6 +5,7 @@ import io.micronaut.core.annotation.NonNull;
 import world.deslauriers.model.database.Address;
 import world.deslauriers.model.database.Phone;
 import world.deslauriers.model.database.Role;
+import world.deslauriers.validation.LettersOnly;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -16,8 +17,8 @@ import java.util.HashSet;
 public record ProfileDto(
         Long id,
         @NonNull @NotBlank @Email @Size(max = 255) String username,
-        @NonNull @NotBlank @Size(min = 1, max = 32) String firstname,
-        @NonNull @NotBlank @Size(min = 1, max = 32) String lastname,
+        @NonNull @NotBlank @LettersOnly @Size(min = 1, max = 32) String firstname,
+        @NonNull @NotBlank @LettersOnly @Size(min = 1, max = 32) String lastname,
         LocalDate dateCreated,
         Boolean enabled,
         Boolean accountExpired,

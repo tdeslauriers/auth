@@ -8,6 +8,7 @@ import world.deslauriers.repository.PhoneRepository;
 import world.deslauriers.repository.UserPhoneRepository;
 import world.deslauriers.repository.UserRepository;
 
+import javax.validation.ConstraintViolationException;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -38,10 +39,10 @@ public class PhoneServiceTest {
         var updated = new HashSet<Phone>();
         current.forEach(userPhone -> updated.add(userPhone.phone()));
         updated.add(badType);
-        var thrown = assertThrows(IllegalArgumentException.class, () -> {
+        // Exception class from annotation validation
+        var valid = assertThrows(ConstraintViolationException.class, () -> {
             phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
         });
-        assertEquals("Invalid phone type: MONKEY", thrown.getMessage());
 
         // clean up
         updated.remove(badType);
@@ -49,7 +50,7 @@ public class PhoneServiceTest {
         // cannot add duplicates or two of same number
         var duplicate = new Phone(VALID_ASSOCIATED_PHONE, "HOME");
         updated.add(duplicate);
-        thrown = assertThrows(IllegalArgumentException.class, () -> {
+        var thrown = assertThrows(IllegalArgumentException.class, () -> {
             phoneService.resolvePhones(updated, userRepository.findByUsername(VALID_USER).get());
         });
         assertEquals("Cannot add duplicate phone numbers.", thrown.getMessage());

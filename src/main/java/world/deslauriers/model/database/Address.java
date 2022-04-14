@@ -7,6 +7,8 @@ import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.MappedEntity;
 import io.micronaut.data.annotation.Relation;
 import io.micronaut.data.jdbc.annotation.JoinTable;
+import world.deslauriers.validation.LettersOnly;
+import world.deslauriers.validation.NumbersOnly;
 import world.deslauriers.validation.UsState;
 
 import javax.validation.constraints.NotBlank;
@@ -19,9 +21,9 @@ import java.util.Set;
 public record Address(
         @Id @GeneratedValue Long id,
         @NonNull @NotBlank @Size(max = 128) String address,
-        @NonNull @NotBlank @Size(max = 64) String city,
+        @NonNull @NotBlank @LettersOnly @Size(max = 64) String city,
         @NonNull @NotBlank @UsState @Size(min = 2, max = 2) String state,
-        @NotNull @NotBlank @Size(min = 5, max = 10) String zip,
+        @NotNull @NotBlank @NumbersOnly @Size(min = 5, max = 5) String zip,
 
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "address")
         @JoinTable(name = "user_address")

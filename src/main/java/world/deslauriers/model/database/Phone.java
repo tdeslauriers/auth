@@ -7,6 +7,8 @@ import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.MappedEntity;
 import io.micronaut.data.annotation.Relation;
 import io.micronaut.data.jdbc.annotation.JoinTable;
+import world.deslauriers.validation.NumbersOnly;
+import world.deslauriers.validation.ValidPhoneType;
 
 import javax.validation.constraints.Size;
 import java.util.Set;
@@ -15,8 +17,8 @@ import java.util.Set;
 @MappedEntity
 public record Phone(
         @Id @GeneratedValue Long id,
-        @NonNull @Size(min = 9, max = 32) String phone,
-        @NonNull @Size(min = 4, max= 4) String type,
+        @NonNull @NumbersOnly @Size(min = 9, max = 32) String phone,
+        @NonNull @ValidPhoneType @Size(min = 4, max= 4) String type,
 
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "phone")
         @JoinTable(name = "user_phone")
