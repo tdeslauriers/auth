@@ -73,7 +73,8 @@ public class ValidationsTest {
             assertEquals(0, pass.size());
         });
 
-        var bad = new ArrayList<>(Arrays.asList( "TomsNum1", "Toms#One", "${jdbc:ldap:\\\\}", "F#@^", "' or 1=1;--", "<script>alert(1)</script>"));
+        var bad = new ArrayList<>(Arrays.asList( "TomsNum1", "Toms#One", " Tom", "${jdbc:ldap:\\\\}", "F#@^",
+                "' or 1=1;--", "<script>alert(1)</script>", "'tom"));
         bad.forEach(name -> {
             var fail = validator.validate(new NameTest(name));
             System.out.println(name);
