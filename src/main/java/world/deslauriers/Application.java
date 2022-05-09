@@ -25,9 +25,6 @@ import io.micronaut.runtime.Micronaut;
 )
 @DockerBuild(group = "tdeslauriers", name = "auth")
 public class Application {
-
-
-
     public static void main(String[] args) {
         Micronaut.run(Application.class, args);
     }

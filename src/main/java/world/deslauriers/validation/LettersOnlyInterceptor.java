@@ -18,7 +18,7 @@ public class LettersOnlyInterceptor implements ConstraintValidator<LettersOnly, 
     @Override
     public boolean isValid(String value, AnnotationValue<LettersOnly> annotationMetadata, ConstraintValidatorContext context) {
 
-        var regex = "^[\\p{L}][\\p{L}\\p{Zs}\\p{Pd}'.]+[\\p{L}]$";
+        var regex = "^[\\p{L}\\p{Zs}\\p{Pd}'.]+$";
         var pattern = Pattern.compile(regex);
         var matcher = pattern.matcher(value);
         if (matcher.matches()){

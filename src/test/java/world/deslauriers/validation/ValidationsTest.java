@@ -66,15 +66,15 @@ public class ValidationsTest {
     @Test
     void testLettersOnly(){
 
-        var good = new ArrayList<>(Arrays.asList("Tom", "O'Connor", "des Lauriers", "Smith-Jones", "St. Pierre"));
+        var good = new ArrayList<>(Arrays.asList("To", "O'Connor", "des Lauriers", "Smith-Jones", "St. Pierre"));
         good.forEach(name -> {
             var pass = validator.validate(new NameTest(name));
             System.out.println(name);
             assertEquals(0, pass.size());
         });
 
-        var bad = new ArrayList<>(Arrays.asList( "TomsNum1", "Toms#One", " Tom", "${jndi:ldap:\\\\}", "F#@^",
-                "' or 1=1;--", "<script>alert(1)</script>", "'tom"));
+        var bad = new ArrayList<>(Arrays.asList( "TomsNum1", "Toms#One", "0Tom", "${jndi:ldap:\\\\}", "F#@^",
+                "' or 1=1;--", "<script>alert(1)</script>"));
         bad.forEach(name -> {
             var fail = validator.validate(new NameTest(name));
             System.out.println(name);
