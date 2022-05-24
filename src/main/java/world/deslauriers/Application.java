@@ -11,17 +11,16 @@ import io.micronaut.runtime.Micronaut;
     host = "localhost",
     replicas = 3,
     envVars = {
-        @Env(name = "JDBC_URL", configmap = "jdbc-config", value = "url"),
-        @Env(name = "JDBC_DRIVER", configmap = "jdbc-config", value = "driver"),
-        @Env(name = "JDBC_DIALECT", configmap = "jdbc-config", value = "dialect"),
-        @Env(name = "CORS_URL", configmap = "cors-config", value = "url"),
-        @Env(name = "CORS_URL_1", configmap = "cors-config", value = "url_1"),
-        @Env(name = "JDBC_USERNAME", secret = "jdbc", value = "username"),
-        @Env(name = "JDBC_PASSWORD", secret = "jdbc", value = "password"),
+        @Env(name = "AUTH_JDBC_URL", configmap = "auth-svc-config", value = "jdbc_url"),
+        @Env(name = "AUTH_JDBC_DRIVER", configmap = "auth-svc-config", value = "jdbc_driver"),
+        @Env(name = "AUTH_JDBC_DIALECT", configmap = "auth-svc-config", value = "jdbc_dialect"),
+        @Env(name = "CORS_URL", configmap = "auth-svc-config", value = "cors_url"),
+        @Env(name = "AUTH_JDBC_USERNAME", secret = "auth-jdbc", value = "username"),
+        @Env(name = "AUTH_JDBC_PASSWORD", secret = "auth-jdbc", value = "password"),
         @Env(name = "JWT_GENERATOR_SIGNATURE_SECRET", secret = "jwt", value = "signature-pw")},
     imagePullPolicy = ImagePullPolicy.Always,
     labels = @Label(key = "app", value = "auth"),
-    ports = @Port(name = "https", containerPort = 8443)
+    ports = @Port(name = "http", containerPort = 8080)
 )
 @DockerBuild(group = "tdeslauriers", name = "auth")
 public class Application {

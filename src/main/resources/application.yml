@@ -8,15 +8,14 @@ micronaut:
         web:
           allowedOrigins:
             - ${CORS_URL}
-            - ${CORS_URL_1}
-  ssl:
-    enabled: true
-    build-self-signed: true
-  http:
-    client:
-      ssl:
-        enabled: true
-        build-self-signed: true
+#  ssl:
+#    enabled: true
+#    build-self-signed: true
+#  http:
+#    client:
+#      ssl:
+#        enabled: true
+#        build-self-signed: true
   security:
     authentication: bearer
     token:
@@ -27,10 +26,10 @@ micronaut:
               secret: ${JWT_GENERATOR_SIGNATURE_SECRET}
 datasources:
   default:
-    url: ${JDBC_URL}
-    username: ${JDBC_USERNAME}
-    password: ${JDBC_PASSWORD}
-    dialect: ${JDBC_DIALECT}
+    url: ${AUTH_JDBC_URL}
+    username: ${AUTH_JDBC_USERNAME}
+    password: ${AUTH_JDBC_PASSWORD}
+    dialect: ${AUTH_JDBC_DIALECT}
 flyway:
   datasources:
     default:
