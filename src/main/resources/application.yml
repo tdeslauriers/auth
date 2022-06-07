@@ -6,8 +6,7 @@ micronaut:
       enabled: true
       configurations:
         web:
-          allowedOrigins:
-            - ${CORS_URL}
+          allowedOrigins: ${CORS_URLS}
 #  ssl:
 #    enabled: true
 #    build-self-signed: true
