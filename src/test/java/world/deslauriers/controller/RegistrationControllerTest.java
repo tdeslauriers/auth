@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class RegistrationControllerTest {
 
     @Inject
-    @Client("/api/auth/")
+    @Client("/")
     HttpClient client;
 
     private static final String VALID_EMAIL = "tom@deslauriers.world";
