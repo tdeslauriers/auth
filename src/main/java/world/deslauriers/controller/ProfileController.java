@@ -24,7 +24,7 @@ import java.util.Optional;
 
 @ExecuteOn(TaskExecutors.IO)
 @Secured(SecurityRule.IS_AUTHENTICATED)
-@Controller("/profiles")
+@Controller("/auth/api/profiles")
 public class ProfileController {
 
     private static final Logger log = LoggerFactory.getLogger(ProfileController.class);

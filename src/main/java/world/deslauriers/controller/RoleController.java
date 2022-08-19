@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @ExecuteOn(TaskExecutors.IO)
 @Secured({"PROFILE_ADMIN"})
-@Controller("/roles")
+@Controller("/auth/api/roles")
 public class RoleController {
 
     private static final Logger log = LoggerFactory.getLogger(RoleController.class);

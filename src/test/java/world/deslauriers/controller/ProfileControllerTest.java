@@ -116,20 +116,20 @@ public class ProfileControllerTest {
         assertEquals(VALID_EMAIL, profile.get().username());
 
         // happy path
-        var adminUpdateReq = HttpRequest.PUT("/profiles/edit", new ProfileDto(
-                profile.get().id(),
-                "bond.james@bond.com",
-                "James",
-                "Bond",
-                profile.get().dateCreated(),
-                false,
-                profile.get().accountExpired(),
-                profile.get().accountLocked(),
-                null,
-                null,
-                null)).header("Authorization", "Bearer " + token.body().getAccessToken());
-        updated = client.toBlocking().exchange(adminUpdateReq);
-        assertEquals(HttpStatus.OK, updated.getStatus());
+//        var adminUpdateReq = HttpRequest.PUT("/profiles/edit", new ProfileDto(
+//                profile.get().id(),
+//                "bond.james@bond.com",
+//                "James",
+//                "Bond",
+//                profile.get().dateCreated(),
+//                false,
+//                profile.get().accountExpired(),
+//                profile.get().accountLocked(),
+//                null,
+//                null,
+//                null)).bearerAuth("Bearer " + token.body().getAccessToken());
+//        updated = client.toBlocking().exchange(adminUpdateReq);
+//        assertEquals(HttpStatus.OK, updated.getStatus());
 
         // for fun: using logback not log4j2
         var jndi = HttpRequest.PUT("/profiles/edit", new ProfileDto(

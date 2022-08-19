@@ -4,9 +4,10 @@ micronaut:
   server:
     cors:
       enabled: true
-      configurations:
-        web:
-          allowedOrigins: ${CORS_URLS}
+#      configurations:
+#        web:
+#          allowedOrigins:
+#            - ${CORS_URLS}
 #  ssl:
 #    enabled: true
 #    build-self-signed: true

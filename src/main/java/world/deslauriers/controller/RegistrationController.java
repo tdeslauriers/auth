@@ -21,7 +21,7 @@ import javax.validation.Valid;
 @Validated
 @ExecuteOn(TaskExecutors.IO)
 @Secured(SecurityRule.IS_ANONYMOUS)
-@Controller("/register")
+@Controller("/auth/api/register")
 public class RegistrationController {
 
     private static final Logger log = LoggerFactory.getLogger(RegistrationController.class);
