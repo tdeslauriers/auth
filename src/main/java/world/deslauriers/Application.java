@@ -11,7 +11,7 @@ import io.micronaut.runtime.Micronaut;
         replicas = 3,
         imagePullPolicy = ImagePullPolicy.Always,
         labels = @Label(key = "app", value = "auth"),
-        ports = @Port(name = "http", hostPort = 8080, containerPort = 8080),
+        ports = @Port(name = "http",hostPort = 8080, containerPort = 8080),
         envVars = {
                 @Env(name = "AUTH_JDBC_URL", configmap = "auth-svc-config", value = "jdbc_url"),
                 @Env(name = "AUTH_JDBC_USERNAME", configmap = "auth-svc-config", value = "jdbc_username"),
