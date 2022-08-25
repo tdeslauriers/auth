@@ -64,7 +64,7 @@ public class ProfileController {
                 allowed.get().enabled(),
                 allowed.get().accountExpired(),
                 allowed.get().accountLocked(),
-                updatedProfile.roles(),
+                null,  // user not allowed to update roles.
                 updatedProfile.addresses(),
                 updatedProfile.phones()));
 
