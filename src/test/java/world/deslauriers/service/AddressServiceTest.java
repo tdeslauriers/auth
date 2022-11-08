@@ -93,7 +93,13 @@ public class AddressServiceTest {
         var fail = assertThrows(ConstraintViolationException.class, () -> {
             addressService.resolveAddresses(addresses, userService.lookupUserByUsername("admin@deslauriers.world").get());
         });
-        assertEquals("save.entity.address: must not be blank", fail.getMessage());
+        // address field violates two constraints, not blant, no special characters > only letters, nums, punct allowed.
+        assertEquals(2, fail.getConstraintViolations().size());
+        assertTrue(fail.getConstraintViolations()
+                .stream()
+                .anyMatch(constraintViolation -> constraintViolation.getMessage().equals("must not be blank")));
+        assertTrue(fail.getConstraintViolations()
+                .stream().anyMatch(constraintViolation -> constraintViolation.getMessage().equals("Only common characters (letters, numbers, dashes, etc.) are allowed.")));
 
         // empty array should delete xref and delete record.
         addresses.clear();

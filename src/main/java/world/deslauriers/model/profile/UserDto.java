@@ -2,6 +2,7 @@ package world.deslauriers.model.profile;
 
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -17,5 +18,6 @@ public record UserDto(
         @NonNull LocalDate dateCreated,
         @NonNull Boolean enabled,
         @NonNull Boolean accountExpired,
-        @NonNull Boolean accountLocked
+        @NonNull Boolean accountLocked,
+        @Nullable LocalDate birthday
 ) {}

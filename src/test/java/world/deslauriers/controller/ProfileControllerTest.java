@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import world.deslauriers.model.profile.ProfileDto;
 import world.deslauriers.model.registration.RegistrationDto;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -67,6 +69,7 @@ public class ProfileControllerTest {
                 profile.get().enabled(),
                 profile.get().accountExpired(),
                 profile.get().accountLocked(),
+                LocalDate.of(1979, Month.APRIL, 1),
                 null,
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
@@ -87,6 +90,7 @@ public class ProfileControllerTest {
                 false,
                 profile.get().accountExpired(),
                 profile.get().accountLocked(),
+                LocalDate.of(2001, Month.DECEMBER, 25),
                 null,
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
@@ -141,6 +145,7 @@ public class ProfileControllerTest {
                 profile.get().enabled(),
                 profile.get().accountExpired(),
                 profile.get().accountLocked(),
+                null,
                 null,
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());

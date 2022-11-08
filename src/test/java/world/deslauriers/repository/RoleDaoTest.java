@@ -13,10 +13,10 @@ public class RoleDaoTest {
     @Inject
     private RoleRepository roleRepository;
 
-    private static final String VALID_ROLE_1 = "GALLERY_READ";
-    private static final String VALID_ROLE_2 = "GALLERY_EDIT";
-    private static final String VALID_TITLE = "Gallery Read";
-    private static final String VALID_DESCRIPTION = "Navigate albums and view gallery content.";
+    private static final String VALID_ROLE_1 = "ALLOWANCE_EARNER";
+    private static final String VALID_ROLE_2 = "ALLOWANCE_REMITTER";
+    private static final String VALID_TITLE = "Allowance user";
+    private static final String VALID_DESCRIPTION = "View and Marks tasks as complete.";
 
     @Test
     void testRoleCrud(){

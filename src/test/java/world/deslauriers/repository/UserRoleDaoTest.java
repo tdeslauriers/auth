@@ -29,10 +29,11 @@ public class UserRoleDaoTest {
     private static final String VALID_CLEAR_PASSWORD = "3rd_Worst_password_ever!";
     private static final String VALID_FIRST = "tom";
     private static final String VALID_LAST = "deslauriers";
-    private static final String VALID_ROLE_1 = "GALLERY_READ";
-    private static final String VALID_ROLE_TITLE = "General Admission";
-    private static final String VALID_ROLE_DESCRIPTION = "Site user.";
-    private static final String VALID_ROLE_2 = "GALLERY_EDIT";
+    private static final String VALID_ROLE_1 = "ALLOWANCE_EARNER";
+    private static final String VALID_ROLE_2 = "ALLOWANCE_REMITTER";
+    private static final String VALID_ROLE_TITLE = "Allowance user";
+    private static final String VALID_ROLE_DESCRIPTION = "View and Marks tasks as complete.";
+
 
 
     @Test

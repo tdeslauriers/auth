@@ -63,6 +63,11 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public Iterable<User> backupAll(){
+        return userRepository.findAll();
+    }
+
+    @Override
     public Iterable<ProfileDto> getAllUsers(){
 
         var users = userRepository.findAll();
@@ -156,7 +161,8 @@ public class UserServiceImpl implements UserService{
                         user.dateCreated(),
                         updatedProfile.enabled(),
                         updatedProfile.accountExpired(),
-                        updatedProfile.accountLocked()));
+                        updatedProfile.accountLocked(),
+                        updatedProfile.birthday()));
                 log.info("\nUpdated UserID " + updated.id() + ":\n" + sb);
             }
 
@@ -200,6 +206,7 @@ public class UserServiceImpl implements UserService{
                 user.enabled(),
                 user.accountExpired(),
                 user.accountLocked(),
+                user.birthday(),
                 roles,
                 addresses,
                 phones);

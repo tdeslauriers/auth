@@ -34,18 +34,18 @@ public class RoleServiceTest {
         roleService.resolveRoles(roles, user);
 
         // must determine which to add from updated set
-        assertEquals(2, userService
+        assertEquals(6, userService
                 .lookupUserByUsername(VALID_USER)
                 .get()
                 .userRoles()
                 .spliterator()
                 .getExactSizeIfKnown());
-
+        System.out.println(userService.lookupUserByUsername(VALID_USER).get());
         // must prevent adding same association over and over
         // HashSet type should prevent this anyway.
         // re-adds what is already there.
         roleService.resolveRoles(roles, userService.lookupUserByUsername(VALID_USER).get());
-        assertEquals(2, userService
+        assertEquals(6, userService
                 .lookupUserByUsername(VALID_USER)
                 .get()
                 .userRoles()

@@ -2,6 +2,7 @@ package world.deslauriers.model.profile;
 
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import world.deslauriers.model.database.Address;
 import world.deslauriers.model.database.Phone;
 import world.deslauriers.model.database.Role;
@@ -23,6 +24,9 @@ public record ProfileDto(
         Boolean enabled,
         Boolean accountExpired,
         Boolean accountLocked,
+
+        @Nullable LocalDate birthday,
+
         HashSet<Role> roles,
         HashSet<Address> addresses,
         HashSet<Phone> phones

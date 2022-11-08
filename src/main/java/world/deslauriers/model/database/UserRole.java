@@ -1,5 +1,6 @@
 package world.deslauriers.model.database;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.annotation.GeneratedValue;
@@ -13,6 +14,7 @@ import io.micronaut.data.jdbc.annotation.JoinTable;
 public record UserRole(
         @Id @GeneratedValue Long id,
 
+        @JsonIgnore
         @Nullable
         @Relation(Relation.Kind.MANY_TO_ONE)
         @JoinTable(name = "user")

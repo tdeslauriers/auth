@@ -9,6 +9,7 @@ import world.deslauriers.repository.UserRepository;
 import world.deslauriers.repository.UserRoleRepository;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,10 +43,10 @@ public class UserServiceTest {
     void testUserServiceMethods(){
 
         var user = userRepository.save(new User(
-                VALID_EMAIL, passwordEncoderService.encode(VALID_CLEAR_PASSWORD), VALID_FIRST, VALID_LAST, LocalDate.now(), true, false, false));
+                VALID_EMAIL, passwordEncoderService.encode(VALID_CLEAR_PASSWORD), VALID_FIRST, VALID_LAST, LocalDate.now(), true, false, false, null));
 
-        var ur1 = userRoleRepository.save(new UserRole(user, roleService.save(new Role(VALID_ROLE_1, "Gallery Read", "disc"))));
-        var ur2 = userRoleRepository.save(new UserRole(user, roleService.save(new Role(VALID_ROLE_2, "Gallery Edit", "disc"))));
+        var ur1 = userRoleRepository.save(new UserRole(user, roleService.getRole(VALID_ROLE_1).get()));
+        var ur2 = userRoleRepository.save(new UserRole(user, roleService.getRole(VALID_ROLE_2).get()));
 
         user = userService.lookupUserByUsername(user.username()).get();
         assertNotNull(user);
@@ -58,7 +59,7 @@ public class UserServiceTest {
         var phones = new HashSet<Phone>();
         phones.add((new Phone("4445556666", "WORK")));
 
-        userService.updateUser(user, new ProfileDto(
+       userService.updateUser(user, new ProfileDto(
                 user.id(),
                 user.username(),
                 user.firstname(),
@@ -68,27 +69,30 @@ public class UserServiceTest {
                 user.accountExpired(),
                 user.accountLocked(),
                 null,
+                null,
                 addresses,
                 phones));
 
         // field changes
-        // bad/malicious inputs require direct integration testing
-        var updated = userService.lookupUserByUsername(user.username()).get();
-        var addressId = updated.userAddresses().stream().filter(userAddress -> userAddress.address().address().equals("456 Test Street")).findFirst().get().id();
-        addresses = new HashSet<Address>();
-        addresses.add(new Address(addressId, "789 Different Ave", "City", "CA", "55555"));
+        user = userService.lookupUserByUsername(user.username()).get();
+        var addy = user.userAddresses().stream().findFirst().get().address();
+        var newStreet = new Address(addy.id(), "123 New Street", addy.city(), addy.state(), addy.zip());
+        var updated = new HashSet<Address>();
+        updated.add(newStreet);
+
 
         userService.updateUser(user, new ProfileDto(
                 user.id(),
                 user.username(),
                 VALID_FIRST,
-                "007",
+                "Vader",
                 user.dateCreated(),
                 false,
                 user.accountExpired(),
                 user.accountLocked(),
+                LocalDate.of(1979, Month.AUGUST, 15),
                 null,
-                addresses,
+                updated,
                 null)); // needs id so putting null to avoid error
 
         // user get profile
@@ -97,7 +101,7 @@ public class UserServiceTest {
         assertEquals(user.id(), profile.get().id());
         assertEquals(user.username(), profile.get().username());
         assertEquals(user.firstname(), profile.get().firstname());
-        assertEquals("007", profile.get().lastname());
+        assertEquals("Vader", profile.get().lastname());
         assertFalse(profile.get().enabled());
         assertFalse(profile.get().accountExpired());
         assertFalse(profile.get().accountLocked());
@@ -110,7 +114,7 @@ public class UserServiceTest {
         assertEquals(user.id(), profile.get().id());
         assertEquals(user.username(), profile.get().username());
         assertEquals(user.firstname(), profile.get().firstname());
-        assertEquals("007", profile.get().lastname());
+        assertEquals("Vader", profile.get().lastname());
         assertFalse(profile.get().enabled());
         assertFalse(profile.get().accountExpired());
         assertFalse(profile.get().accountLocked());

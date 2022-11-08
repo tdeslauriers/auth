@@ -34,7 +34,7 @@ public class UserDaoTest {
         user = userRepository.save(user);
         assertNotNull(user.id());
 
-        user = new User(user.id(), VALID_EMAIL, "This_1_is_bad_2!", VALID_FIRST, VALID_LAST, dateCreated, true, false, false);
+        user = new User(user.id(), VALID_EMAIL, "This_1_is_bad_2!", VALID_FIRST, VALID_LAST, dateCreated, true, false, false, LocalDate.now());
         var checkId = user.id();
         user = userRepository.update(user);
         assertNotNull(user.id());
