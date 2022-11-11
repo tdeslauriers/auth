@@ -1,5 +1,6 @@
 package world.deslauriers.model.profile;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
@@ -20,7 +21,7 @@ public record ProfileDto(
         @NonNull @NotBlank @Email @Size(max = 255) String username,
         @NonNull @NotBlank @LettersOnly @Size(min = 1, max = 32) String firstname,
         @NonNull @NotBlank @LettersOnly @Size(min = 1, max = 32) String lastname,
-        LocalDate dateCreated,
+        @JsonFormat(pattern="yyyy-MM-dd") LocalDate dateCreated,
         Boolean enabled,
         Boolean accountExpired,
         Boolean accountLocked,

@@ -1,6 +1,7 @@
 package world.deslauriers.model.database;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
@@ -24,7 +25,7 @@ public record User(
         @NonNull @NotBlank @PasswordComplexity String password,
         @NonNull @NotBlank @LettersOnly @Size(min = 1, max = 32)String firstname,
         @NonNull @NotBlank @LettersOnly @Size(min = 1, max = 32)String lastname,
-        @DateCreated @NotNull LocalDate dateCreated,
+        @JsonFormat(pattern="yyyy-MM-dd") @DateCreated @NotNull LocalDate dateCreated,
         @NotNull Boolean enabled,
         @NotNull Boolean accountExpired,
         @NotNull Boolean accountLocked,
