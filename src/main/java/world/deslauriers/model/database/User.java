@@ -29,7 +29,7 @@ public record User(
         @NotNull Boolean enabled,
         @NotNull Boolean accountExpired,
         @NotNull Boolean accountLocked,
-        @Nullable LocalDate birthday,
+        @JsonFormat(pattern="yyyy-MM-dd") @Nullable LocalDate birthday,
 
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "user")
         @JoinTable(name = "user_role")

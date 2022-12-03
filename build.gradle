@@ -27,6 +27,7 @@ dependencies {
     annotationProcessor("io.micronaut:micronaut-http-validation")
     annotationProcessor("io.micronaut.data:micronaut-data-processor")
     annotationProcessor("io.micronaut.security:micronaut-security-annotations")
+
     implementation 'io.dekorate:kubernetes-annotations:2.11.1'
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-management")
