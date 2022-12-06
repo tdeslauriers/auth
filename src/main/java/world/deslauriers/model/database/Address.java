@@ -31,11 +31,16 @@ public record Address(
         Set<UserAddress> userAddresses
 
 ) {
-        public Address(@NonNull String address, @NonNull String city, @NonNull String state, String zip) {
-                this(null, address, city, state, zip, null);
-        }
+    public Address(@NonNull String address, @NonNull String city, @NonNull String state, String zip) {
+            this(null, address, city, state, zip, null);
+    }
 
-        public Address(Long id, @NonNull String address, @NonNull String city, @NonNull String state, String zip) {
-                this(id, address, city, state, zip, null);
-        }
+    public Address(Long id, @NonNull String address, @NonNull String city, @NonNull String state, String zip) {
+            this(id, address, city, state, zip, null);
+    }
+
+    // for deletion success
+    public Address(Long id) {
+        this(id, null, null, null, null, null);
+    }
 }

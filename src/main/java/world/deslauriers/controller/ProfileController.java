@@ -76,7 +76,7 @@ public class ProfileController {
 
     // admin
     @Secured({"PROFILE_ADMIN"})
-    @Get("/all")
+    @Get
     public Iterable<ProfileDto> getAll(){
 
         return userService.getAllUsers();
