@@ -82,7 +82,9 @@ public class AddressServiceImpl implements AddressService {
     public void deleteAddress(UserAddress userAddress) {
 
         userAddressRepository.delete(userAddress);
+        log.info("Xref {}: Address id: {} - User id: {} has been removed.", userAddress.id(), userAddress.address().id(), userAddress.user().id());
         addressRepository.delete(userAddress.address());
+        log.info("Deleted adderess id {}: {}, {}, {} {}", userAddress.id(), userAddress.address().address(), userAddress.address().city(), userAddress.address().state(), userAddress.address().zip());
     }
 
     @Override
