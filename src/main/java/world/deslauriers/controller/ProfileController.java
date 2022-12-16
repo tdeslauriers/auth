@@ -82,7 +82,7 @@ public class ProfileController {
         return userService.getAllUsers();
     }
 
-    @Secured({"PROFILE_ADMIN"})
+    @Secured({"PROFILE_ADMIN", "ALLOWANCE_ADMIN"})
     @Get("/{id}")
     public Optional<ProfileDto> getById(Long id){
 
