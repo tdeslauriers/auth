@@ -19,7 +19,7 @@ public interface UserService {
     Iterable<ProfileDto> getAllUsers();
 
     Optional<ProfileDto> getProfile(String username);
-    Optional<ProfileDto> getProfileById(Long id);
+    Optional<ProfileDto> getProfileByUuid(String uuid);
 
     Optional<ProfileDto> updateUser(User user, ProfileDto updatedProfile);
 }

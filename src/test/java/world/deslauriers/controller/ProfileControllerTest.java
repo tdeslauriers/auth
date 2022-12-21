@@ -70,7 +70,7 @@ public class ProfileControllerTest {
                 profile.get().accountExpired(),
                 profile.get().accountLocked(),
                 LocalDate.of(1979, Month.APRIL, 1),
-                null,
+                user.uuid(), null,
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
         var thrown = assertThrows(HttpClientResponseException.class, () -> {
@@ -91,7 +91,7 @@ public class ProfileControllerTest {
                 profile.get().accountExpired(),
                 profile.get().accountLocked(),
                 LocalDate.of(2001, Month.DECEMBER, 25),
-                null,
+                user.uuid(), null,
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
         var updated = client.toBlocking().exchange(validUserUpdateReq);
@@ -146,7 +146,7 @@ public class ProfileControllerTest {
                 profile.get().accountExpired(),
                 profile.get().accountLocked(),
                 null,
-                null,
+                user.uuid(), null,
                 null,
                 null)).header("Authorization", "Bearer " + token.body().getAccessToken());
         thrown = assertThrows(HttpClientResponseException.class, () -> {

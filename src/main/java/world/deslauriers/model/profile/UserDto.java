@@ -7,6 +7,7 @@ import io.micronaut.core.annotation.Nullable;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
@@ -20,5 +21,6 @@ public record UserDto(
         @NonNull Boolean enabled,
         @NonNull Boolean accountExpired,
         @NonNull Boolean accountLocked,
-        @JsonFormat(pattern="yyyy-MM-dd") @Nullable LocalDate birthday
+        @JsonFormat(pattern="yyyy-MM-dd") @Nullable LocalDate birthday,
+        @Nullable String uuid
 ) {}

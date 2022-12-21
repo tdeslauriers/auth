@@ -69,7 +69,7 @@ public class UserServiceTest {
                 user.accountExpired(),
                 user.accountLocked(),
                 null,
-                null,
+               user.uuid(), null,
                 addresses,
                 phones));
 
@@ -91,7 +91,7 @@ public class UserServiceTest {
                 user.accountExpired(),
                 user.accountLocked(),
                 LocalDate.of(1979, Month.AUGUST, 15),
-                null,
+                user.uuid(), null,
                 updated,
                 null)); // needs id so putting null to avoid error
 

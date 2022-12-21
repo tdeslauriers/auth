@@ -25,9 +25,8 @@ public record ProfileDto(
         Boolean enabled,
         Boolean accountExpired,
         Boolean accountLocked,
-
         @JsonFormat(pattern="yyyy-MM-dd") @Nullable LocalDate birthday,
-
+        String uuid,
         HashSet<Role> roles,
         HashSet<Address> addresses,
         HashSet<Phone> phones
