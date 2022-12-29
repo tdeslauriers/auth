@@ -94,6 +94,7 @@ public class DelegatingAuthProviderImpl implements AuthenticationProvider {
         var attributes = new HashMap<String, Object>();
         attributes.put("firstname", user.firstname());
         attributes.put("lastname", user.lastname());
+        attributes.put("user_uuid", user.uuid());
 
         return AuthenticationResponse.success(user.username(), authorities, attributes);
     }
