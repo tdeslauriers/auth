@@ -38,3 +38,8 @@ flyway:
   datasources:
     default:
       enabled: true
+
+netty:
+  default:
+    allocator:
+      max-order: 10

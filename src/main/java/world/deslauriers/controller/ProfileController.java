@@ -83,7 +83,7 @@ public class ProfileController {
         return userService.getAllUsers();
     }
 
-    @Secured({"PROFILE_ADMIN", "ALLOWANCE_ADMIN"})
+    @Secured({"PROFILE_ADMIN", "PROFILE_READ"})
     @Get("/{uuid}")
     public Optional<ProfileDto> getByUuid(String uuid){
 

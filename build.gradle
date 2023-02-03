@@ -9,6 +9,10 @@ dockerBuild {
     images = ["tdeslauriers/auth:${project.version}"]
 }
 
+dockerBuildNative {
+    images = ["tdeslauriers/auth:${project.version}"]
+}
+
 repositories {
     mavenCentral()
 }
