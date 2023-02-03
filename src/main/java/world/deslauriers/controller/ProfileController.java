@@ -47,24 +47,25 @@ public class ProfileController {
     @Put("/user")
     public HttpResponse updateProfile(@Body @Valid ProfileDto updatedProfile, Principal principal){
 
-        var allowed = userService.lookupUserByUsername(principal.getName());
+        var existing = userService.lookupUserByUsername(principal.getName());
 
-        if (allowed.isEmpty()){
+        if (existing.isEmpty()){
             log.warn("Attempt to edit non-existent user: " + principal.getName());
             return HttpResponse.status(HttpStatus.BAD_REQUEST).body("User does not exist.");
         }
 
         // may only update your own record.
-        userService.updateUser(allowed.get(), new ProfileDto(
-                allowed.get().id(),
-                allowed.get().username(),
+        userService.updateUser(existing.get(), new ProfileDto(
+                existing.get().id(),
+                existing.get().username(),
                 updatedProfile.firstname(),
                 updatedProfile.lastname(),
-                allowed.get().dateCreated(),
-                allowed.get().enabled(),
-                allowed.get().accountExpired(),
-                allowed.get().accountLocked(),
+                existing.get().dateCreated(),
+                existing.get().enabled(),
+                existing.get().accountExpired(),
+                existing.get().accountLocked(),
                 updatedProfile.birthday(),
+                existing.get().uuid(),
                 null,  // user not allowed to update roles.
                 updatedProfile.addresses(),
                 updatedProfile.phones()));
@@ -76,17 +77,17 @@ public class ProfileController {
 
     // admin
     @Secured({"PROFILE_ADMIN"})
-    @Get("/all")
+    @Get
     public Iterable<ProfileDto> getAll(){
 
         return userService.getAllUsers();
     }
 
-    @Secured({"PROFILE_ADMIN"})
-    @Get("/{id}")
-    public Optional<ProfileDto> getById(Long id){
+    @Secured({"PROFILE_ADMIN", "PROFILE_READ"})
+    @Get("/{uuid}")
+    public Optional<ProfileDto> getByUuid(String uuid){
 
-        return userService.getProfileById(id);
+        return userService.getProfileByUuid(uuid);
     }
 
     @Secured({"PROFILE_ADMIN"})

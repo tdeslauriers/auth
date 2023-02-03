@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.UUID;
 
 @Singleton
 public class UserServiceImpl implements UserService{
@@ -89,7 +90,8 @@ public class UserServiceImpl implements UserService{
                 LocalDate.now(),
                 true , // set enabled to false when create email verification
                 false,
-                false);
+                false,
+                UUID.randomUUID().toString()); // dont need byte value in db
         user = userRepository.save(user);
         log.info("User Registration successful; ID: " + user.id().toString() + " - Username: " + user.username());
 
@@ -112,9 +114,9 @@ public class UserServiceImpl implements UserService{
 
     // admin
     @Override
-    public Optional<ProfileDto> getProfileById(Long id){
+    public Optional<ProfileDto> getProfileByUuid(String uuid){
 
-        var user = userRepository.findById(id);
+        var user = userRepository.findByUuid(uuid);
         return user.map(this::buildProfile);
     }
 
@@ -162,7 +164,8 @@ public class UserServiceImpl implements UserService{
                         updatedProfile.enabled(),
                         updatedProfile.accountExpired(),
                         updatedProfile.accountLocked(),
-                        updatedProfile.birthday()));
+                        updatedProfile.birthday(),
+                        user.uuid()));
                 log.info("\nUpdated UserID " + updated.id() + ":\n" + sb);
             }
 
@@ -182,7 +185,7 @@ public class UserServiceImpl implements UserService{
             log.error(e.getMessage());
             throw e;
         }
-        return getProfileById(user.id());
+        return getProfileByUuid(user.uuid());
     }
 
     private ProfileDto buildProfile(User user){
@@ -207,6 +210,7 @@ public class UserServiceImpl implements UserService{
                 user.accountExpired(),
                 user.accountLocked(),
                 user.birthday(),
+                user.uuid(),
                 roles,
                 addresses,
                 phones);

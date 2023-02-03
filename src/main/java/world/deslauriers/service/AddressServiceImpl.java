@@ -34,10 +34,7 @@ public class AddressServiceImpl implements AddressService {
 
         // remove address
         if (addresses.size() == 0){
-            user.userAddresses().forEach(userAddress -> {
-                userAddressRepository.delete(userAddress);
-                addressRepository.delete(userAddress.address());
-            });
+            user.userAddresses().forEach(this::deleteAddress);
         }
 
         // only allowed to add one or edit one
@@ -48,7 +45,6 @@ public class AddressServiceImpl implements AddressService {
 
         // user has no address
         if (addresses.iterator().hasNext() && !user.userAddresses().iterator().hasNext()){
-
 
             // cannot add existing record to user
             if (addresses.iterator().next().id() != null){
@@ -80,5 +76,24 @@ public class AddressServiceImpl implements AddressService {
             log.info("Updated " + user.userAddresses().iterator().next().address() + " to " + updated + "on user " + user.username());
         }
 
+    }
+
+    @Override
+    public void deleteAddress(UserAddress userAddress) {
+
+        userAddressRepository.delete(userAddress);
+        log.info("Xref {}: Address id: {} - User id: {} has been removed.", userAddress.id(), userAddress.address().id(), userAddress.user().id());
+        addressRepository.delete(userAddress.address());
+        log.info("Deleted adderess id {}: {}, {}, {} {}", userAddress.id(), userAddress.address().address(), userAddress.address().city(), userAddress.address().state(), userAddress.address().zip());
+    }
+
+    @Override
+    public Optional<UserAddress> findAddressUserXref(String username, Long addressId) {
+
+        return userAddressRepository
+                .findByAddressId(addressId)
+                .stream()
+                .filter(userAddress -> userAddress.user().username().equals(username))
+                .findFirst();
     }
 }

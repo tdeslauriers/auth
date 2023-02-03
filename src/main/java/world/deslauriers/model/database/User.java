@@ -31,6 +31,8 @@ public record User(
         @NotNull Boolean accountLocked,
         @JsonFormat(pattern="yyyy-MM-dd") @Nullable LocalDate birthday,
 
+        @NonNull String uuid,
+
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "user")
         @JoinTable(name = "user_role")
         Set<UserRole> userRoles,
@@ -43,19 +45,19 @@ public record User(
         @JoinTable(name = "user_phone")
         Set<UserPhone> userPhones
 ) {
-        public User(@NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, LocalDate birthday) {
-                this(null, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, birthday, null, null, null);
+        public User(@NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, @Nullable LocalDate birthday, @NonNull String uuid) {
+                this(null, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, birthday, uuid, null, null, null);
         }
 
-        public User(Long id, @NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, LocalDate birthday) {
-                this(id, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, birthday, null, null, null);
+        public User(Long id, @NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, @Nullable LocalDate birthday, @NonNull String uuid) {
+                this(id, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, birthday, uuid, null, null, null);
         }
 
-        public User(@NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked) {
-                this(null, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, null, null, null, null);
+        public User(@NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, @NonNull String uuid) {
+                this(null, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, null, uuid, null, null, null);
         }
 
-        public User(Long id, @NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked) {
-                this(id, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, null, null, null, null);
+        public User(Long id, @NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, @NonNull String uuid) {
+                this(id, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, null, uuid, null, null, null);
         }
 }

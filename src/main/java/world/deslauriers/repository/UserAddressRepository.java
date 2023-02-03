@@ -7,10 +7,16 @@ import io.micronaut.data.repository.PageableRepository;
 import world.deslauriers.model.database.User;
 import world.deslauriers.model.database.UserAddress;
 
+import java.util.List;
+
 @JdbcRepository(dialect = Dialect.MYSQL)
 public interface UserAddressRepository extends PageableRepository<UserAddress, Long> {
 
     @Join(value = "user", type = Join.Type.LEFT_FETCH)
     @Join(value = "address", type = Join.Type.LEFT_FETCH)
     Iterable<UserAddress> findByUser(User user);
+
+    @Join(value = "user", type = Join.Type.LEFT_FETCH)
+    @Join(value = "address", type = Join.Type.LEFT_FETCH)
+    List<UserAddress> findByAddressId(Long id);
 }
