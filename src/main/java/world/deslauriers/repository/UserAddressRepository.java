@@ -1,22 +1,21 @@
 package world.deslauriers.repository;
 
 import io.micronaut.data.annotation.Join;
-import io.micronaut.data.jdbc.annotation.JdbcRepository;
 import io.micronaut.data.model.query.builder.sql.Dialect;
-import io.micronaut.data.repository.PageableRepository;
+import io.micronaut.data.r2dbc.annotation.R2dbcRepository;
+import io.micronaut.data.repository.reactive.ReactorCrudRepository;
+import reactor.core.publisher.Flux;
 import world.deslauriers.model.database.User;
 import world.deslauriers.model.database.UserAddress;
 
-import java.util.List;
-
-@JdbcRepository(dialect = Dialect.MYSQL)
-public interface UserAddressRepository extends PageableRepository<UserAddress, Long> {
+@R2dbcRepository(dialect = Dialect.MYSQL)
+public interface UserAddressRepository extends ReactorCrudRepository<UserAddress, Long> {
 
     @Join(value = "user", type = Join.Type.LEFT_FETCH)
     @Join(value = "address", type = Join.Type.LEFT_FETCH)
-    Iterable<UserAddress> findByUser(User user);
+    Flux<UserAddress> findByUser(User user);
 
     @Join(value = "user", type = Join.Type.LEFT_FETCH)
     @Join(value = "address", type = Join.Type.LEFT_FETCH)
-    List<UserAddress> findByAddressId(Long id);
+    Flux<UserAddress> findByAddressId(Long id);
 }

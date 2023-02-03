@@ -1,12 +1,11 @@
 package world.deslauriers.model.database;
 
-import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.data.annotation.GeneratedValue;
 import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.MappedEntity;
 import io.micronaut.data.annotation.Relation;
-import io.micronaut.data.jdbc.annotation.JoinTable;
+import io.micronaut.serde.annotation.Serdeable;
 import world.deslauriers.validation.LettersOnly;
 import world.deslauriers.validation.NoSpecialChars;
 import world.deslauriers.validation.NumbersOnly;
@@ -17,7 +16,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Set;
 
-@Introspected
+@Serdeable
 @MappedEntity
 public record Address(
         @Id @GeneratedValue Long id,
@@ -27,7 +26,6 @@ public record Address(
         @NotNull @NotBlank @NumbersOnly @Size(min = 5, max = 5) String zip,
 
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "address")
-        @JoinTable(name = "user_address")
         Set<UserAddress> userAddresses
 
 ) {

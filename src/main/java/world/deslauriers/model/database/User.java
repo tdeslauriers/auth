@@ -2,11 +2,10 @@ package world.deslauriers.model.database;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.annotation.*;
-import io.micronaut.data.jdbc.annotation.JoinTable;
+import io.micronaut.serde.annotation.Serdeable;
 import world.deslauriers.validation.LettersOnly;
 import world.deslauriers.validation.PasswordComplexity;
 
@@ -17,7 +16,9 @@ import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.Set;
 
-@Introspected
+import static io.micronaut.data.annotation.Relation.Kind;
+
+@Serdeable
 @MappedEntity
 public record User(
         @Id @GeneratedValue Long id,
@@ -33,16 +34,13 @@ public record User(
 
         @NonNull String uuid,
 
-        @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "user")
-        @JoinTable(name = "user_role")
+        @Relation(value = Kind.ONE_TO_MANY, mappedBy = "user")
         Set<UserRole> userRoles,
 
-        @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "user")
-        @JoinTable(name = "user_address")
+        @Relation(value = Kind.ONE_TO_MANY, mappedBy = "user")
         Set<UserAddress> userAddresses,
 
-        @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "user")
-        @JoinTable(name = "user_phone")
+        @Relation(value = Kind.ONE_TO_MANY, mappedBy = "user")
         Set<UserPhone> userPhones
 ) {
         public User(@NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, @Nullable LocalDate birthday, @NonNull String uuid) {

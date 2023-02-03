@@ -1,9 +1,9 @@
 package world.deslauriers.model.profile;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
+import io.micronaut.serde.annotation.Serdeable;
 import world.deslauriers.model.database.Address;
 import world.deslauriers.model.database.Phone;
 import world.deslauriers.model.database.Role;
@@ -15,7 +15,7 @@ import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.HashSet;
 
-@Introspected
+@Serdeable
 public record ProfileDto(
         Long id,
         @NonNull @NotBlank @Email @Size(max = 255) String username,
