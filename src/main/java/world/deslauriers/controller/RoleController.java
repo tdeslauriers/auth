@@ -28,43 +28,28 @@ public class RoleController {
 
     @Get
     Flux<Role> getAllRoles(){
-
         return roleService.getAllRoles();
     }
 
     @Get("/{id}")
     Mono<Role> getById(Long id){
-
         return roleService.getById(id);
     }
 
     @Put
     Mono<HttpResponse<?>> updateRole(@Body @Valid Role role){
-
-        var lookup = roleService.getById(role.id());
-
-        if (lookup.isEmpty()){
-            log.error("Attempt to edit invalid Role id: " + role.id() + " - does not exist.");
-            throw new IllegalArgumentException("Invalid role id.");
-        }
-
-        var updated = roleService.update(role);
-        log.info(lookup.get() + " edited to " + updated);
-
-        return HttpResponse
-                .noContent()
-                .header(HttpHeaders.LOCATION, location(updated.id()).getPath());
+        return roleService.update(role)
+                .map(r -> HttpResponse
+                        .noContent()
+                        .header(HttpHeaders.LOCATION, location(r.id()).getPath()));
     }
 
     @Post
     Mono<HttpResponse<Role>> save(@Valid @Body Role role){
-
-        var add = roleService.save(role);
-        log.info(add + " created.");
-
-        return HttpResponse
-                .created(add)
-                .headers(headers -> headers.location(location(add.id())));
+        return roleService.save(role)
+            .map(r -> HttpResponse
+                    .created(r)
+                    .headers(headers -> headers.location(location(r.id()))));
     }
 
     protected URI location(Long id) {

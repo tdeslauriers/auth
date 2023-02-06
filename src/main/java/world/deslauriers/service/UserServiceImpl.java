@@ -14,9 +14,7 @@ import world.deslauriers.repository.UserRepository;
 import world.deslauriers.repository.UserRoleRepository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.UUID;
 
 @Singleton
@@ -94,7 +92,7 @@ public class UserServiceImpl implements UserService{
                             .flatMap(user -> userRoleRepository.save(new UserRole(user, roleService.getRole("GENERAL_ADMISSION").block())))
                             .flatMap(userRole -> {
                                 log.info("Registered user: {} with the baseline scope: {}", userRole.user().username(), userRole.role().role());
-                                return Mono.just(new RegistrationResponseDto(201, null, "Registration successful: " + userRole.user().username(), "/register"))
+                                return Mono.just(new RegistrationResponseDto(201, null, "Registration successful: " + userRole.user().username(), "/register"));
                             });
                 })));
     }
@@ -143,6 +141,10 @@ public class UserServiceImpl implements UserService{
                 log.info("Updating {}'s locked status: {} --> {}", user.username(), user.accountLocked(), updatedProfile.accountLocked());
             }
 
+            if (updatedProfile.roles() != null){
+                roleService.resolveRoles(updatedProfile.roles(), user);
+            }
+
             return userRepository.update(new User(
                     user.id(),
                     updatedProfile.username(),
@@ -165,9 +167,7 @@ public class UserServiceImpl implements UserService{
 //                phoneService.resolvePhones(updatedProfile.phones(), user);
 //            }
 //
-//            if (updatedProfile.roles() != null){
-//                roleService.resolveRoles(updatedProfile.roles(), user);
-//            }
+
     }
 
     private ProfileDto buildProfile(User user){
