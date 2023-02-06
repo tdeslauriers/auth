@@ -4,9 +4,12 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.*;
 import world.deslauriers.model.profile.ProfileDto;
 import world.deslauriers.model.registration.RegistrationDto;
+import world.deslauriers.model.registration.RegistrationResponseDto;
 import world.deslauriers.repository.UserRepository;
 import world.deslauriers.repository.UserRoleRepository;
 
@@ -48,144 +51,123 @@ public class UserServiceImpl implements UserService{
         this.passwordEncoderService = passwordEncoderService;
     }
 
-    @Override
-    public Boolean userExists(String email){
-        return userRepository.findUsername(email).isPresent();
-    }
 
     @Override
-    public Optional<User> lookupUserByUsername(String email) {
+    public Mono<User> getUserByUsername(String email) {
         return userRepository.findByUsername(email);
     }
 
     @Override
-    public Optional<User> lookupUserById(Long id){
+    public Mono<User> getUserById(Long id){
         return userRepository.findById(id);
     }
 
     @Override
-    public Iterable<User> backupAll(){
+    public Flux<User> backupAll(){
         return userRepository.findAll();
     }
 
     @Override
-    public Iterable<ProfileDto> getAllUsers(){
-
-        var users = userRepository.findAll();
-        var profiles = new ArrayList<ProfileDto>((int) users.spliterator().getExactSizeIfKnown());
-        users.forEach(user -> { profiles.add(buildProfile(user)); });
-
-       return profiles;
+    public Flux<ProfileDto> getAllUsers(){
+        return userRepository.findAll().map(this::buildProfile);
     }
 
     @Override
-    public String registerUser(RegistrationDto registrationDto){
+    public Mono<RegistrationResponseDto> registerUser(RegistrationDto registrationDto){
 
-        var message = new StringBuilder();
-        var user = new User(
-                registrationDto.username(),
-                passwordEncoderService.encode(registrationDto.password()),
-                registrationDto.firstname(),
-                registrationDto.lastname(),
-                LocalDate.now(),
-                true , // set enabled to false when create email verification
-                false,
-                false,
-                UUID.randomUUID().toString()); // dont need byte value in db
-        user = userRepository.save(user);
-        log.info("User Registration successful; ID: " + user.id().toString() + " - Username: " + user.username());
-
-        // add default role/scope
-        userRoleRepository.save(new UserRole(user, roleService.getRole("GENERAL_ADMISSION").get()));
-        log.info("User ID: " + user.id() + " granted scope: GENERAL_ADMISSION.");
-        message.append("Registration successful"); // placeholder for email verification service.
-
-        return message.toString();
+        return userRepository.findByUsername(registrationDto.username())
+                .flatMap(existsUser -> Mono.just(( new RegistrationResponseDto(400, "Bad Request", "Username unavailable", "/register")))
+                .switchIfEmpty(Mono.defer(() -> {
+                    if (!registrationDto.password().equals(registrationDto.confirmPassword())){
+                        return Mono.just(new RegistrationResponseDto(400, "Bad Request", "Passwords do not match.", "/register"));
+                    }
+                    return userRepository.save(new User(
+                            registrationDto.username(),
+                            passwordEncoderService.encode(registrationDto.password()),
+                            registrationDto.firstname(),
+                            registrationDto.lastname(),
+                            LocalDate.now(),
+                            true , // set enabled to false when create email verification
+                            false,
+                            false,
+                            UUID.randomUUID().toString()))
+                            .flatMap(user -> userRoleRepository.save(new UserRole(user, roleService.getRole("GENERAL_ADMISSION").block())))
+                            .flatMap(userRole -> {
+                                log.info("Registered user: {} with the baseline scope: {}", userRole.user().username(), userRole.role().role());
+                                return Mono.just(new RegistrationResponseDto(201, null, "Registration successful: " + userRole.user().username(), "/register"))
+                            });
+                })));
     }
 
     // user
     @Override
-    public Optional<ProfileDto> getProfile(String username){
+    public Mono<ProfileDto> getProfile(String username){
 
         // user is present because came from jwt, login is user check
-        var user = lookupUserByUsername(username);
+        var user = getUserByUsername(username);
         return user.map(this::buildProfile);
     }
 
     // admin
     @Override
-    public Optional<ProfileDto> getProfileByUuid(String uuid){
-
-        var user = userRepository.findByUuid(uuid);
-        return user.map(this::buildProfile);
+    public Mono<ProfileDto> getProfileByUuid(String uuid){
+        return userRepository.findByUuid(uuid).map(this::buildProfile);
     }
 
     @Override
-    public Optional<ProfileDto> updateUser(User user, ProfileDto updatedProfile) {
+    public Mono<User> updateUser(User user, ProfileDto updatedProfile) {
 
-        var sb = new StringBuilder();
-        try {
             // logging is placeholder for updating user field history table
-            // update username: not allowed, this will be done via email validation build
-
             // update firstname
             if (!updatedProfile.firstname().equals(user.firstname())){
-                sb.append(user.firstname()).append(" --> ").append(updatedProfile.firstname()).append("\n");
+                log.info("Updating {}'s firstname: {} --> {}", user.username(), user.firstname(), updatedProfile.firstname());
             }
 
             // update lastname
             if (!updatedProfile.lastname().equals(user.lastname())){
-                sb.append(user.lastname()).append(" --> ").append(updatedProfile.lastname()).append("\n");
+                log.info("Updating {}'s lastname: {} --> {}", user.username(), user.lastname(), updatedProfile.lastname());
             }
 
             // enabled?
             if (!updatedProfile.enabled().equals(user.enabled())){
-                sb.append("Enabled: ").append(user.enabled()).append(" --> ").append(updatedProfile.enabled()).append("\n");
+                log.info("Updating {}'s enabled status: {} --> {}", user.username(), user.enabled(), updatedProfile.enabled());
             }
 
             // account expired?
             if (!updatedProfile.accountExpired().equals(user.accountExpired())){
-                sb.append("Account expired: ").append(user.accountExpired()).append(" --> ").append(updatedProfile.accountExpired()).append("\n");
+                log.info("Updating {}'s expired status: {} --> {}", user.username(), user.accountExpired(), updatedProfile.accountExpired());
             }
 
             // account locked?
             if (!updatedProfile.accountLocked().equals(user.accountLocked())){
-                sb.append("Account locked: ").append(user.accountLocked()).append(" --> ").append(updatedProfile.accountLocked()).append("\n");
+                log.info("Updating {}'s locked status: {} --> {}", user.username(), user.accountLocked(), updatedProfile.accountLocked());
             }
 
-            if (sb.length() > 0) {
-                var updated = userRepository.update(new User(
-                        user.id(),
-                        updatedProfile.username(),
-                        user.password(),
-                        updatedProfile.firstname(),
-                        updatedProfile.lastname(),
-                        user.dateCreated(),
-                        updatedProfile.enabled(),
-                        updatedProfile.accountExpired(),
-                        updatedProfile.accountLocked(),
-                        updatedProfile.birthday(),
-                        user.uuid()));
-                log.info("\nUpdated UserID " + updated.id() + ":\n" + sb);
-            }
+            return userRepository.update(new User(
+                    user.id(),
+                    updatedProfile.username(),
+                    user.password(),
+                    updatedProfile.firstname(),
+                    updatedProfile.lastname(),
+                    user.dateCreated(),
+                    updatedProfile.enabled(),
+                    updatedProfile.accountExpired(),
+                    updatedProfile.accountLocked(),
+                    updatedProfile.birthday(),
+                    user.uuid()));
 
-            if (updatedProfile.addresses() != null){
-                addressService.resolveAddresses(updatedProfile.addresses(), user);
-            }
 
-            if (updatedProfile.phones() != null){
-                phoneService.resolvePhones(updatedProfile.phones(), user);
-            }
-
-            if (updatedProfile.roles() != null){
-                roleService.resolveRoles(updatedProfile.roles(), user);
-            }
-
-        } catch (IllegalArgumentException e) {
-            log.error(e.getMessage());
-            throw e;
-        }
-        return getProfileByUuid(user.uuid());
+//            if (updatedProfile.addresses() != null){
+//                addressService.resolveAddresses(updatedProfile.addresses(), user);
+//            }
+//
+//            if (updatedProfile.phones() != null){
+//                phoneService.resolvePhones(updatedProfile.phones(), user);
+//            }
+//
+//            if (updatedProfile.roles() != null){
+//                roleService.resolveRoles(updatedProfile.roles(), user);
+//            }
     }
 
     private ProfileDto buildProfile(User user){
@@ -198,7 +180,6 @@ public class UserServiceImpl implements UserService{
 
         var phones = new HashSet<Phone>();
         user.userPhones().forEach(userPhone -> phones.add(userPhone.phone()));
-
 
         return new ProfileDto(
                 user.id(),

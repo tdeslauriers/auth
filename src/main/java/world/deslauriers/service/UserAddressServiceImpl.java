@@ -1,16 +1,15 @@
 package world.deslauriers.service;
 
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import reactor.core.Disposable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.UserAddress;
 import world.deslauriers.repository.UserAddressRepository;
-
-import java.util.List;
 
 @Singleton
 public class UserAddressServiceImpl implements UserAddressService{
 
-    @Inject
     private final UserAddressRepository userAddressRepository;
 
     public UserAddressServiceImpl(UserAddressRepository userAddressRepository) {
@@ -18,7 +17,12 @@ public class UserAddressServiceImpl implements UserAddressService{
     }
 
     @Override
-    public List<UserAddress> getByAddressId(Long id) {
+    public Flux<UserAddress> getByAddressId(Long id) {
         return userAddressRepository.findByAddressId(id);
+    }
+
+    @Override
+    public Mono<Long> delete(UserAddress userAddress) {
+        return userAddressRepository.delete(userAddress);
     }
 }

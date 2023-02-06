@@ -30,4 +30,8 @@ public record ProfileDto(
         HashSet<Role> roles,
         HashSet<Address> addresses,
         HashSet<Phone> phones
-) {}
+) {
+    public ProfileDto(Long id, @NonNull String username, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, String uuid) {
+        this(id, username, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, null, uuid, null, null, null);
+    }
+}

@@ -1,5 +1,6 @@
 package world.deslauriers.service;
 
+import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.Role;
 import world.deslauriers.model.database.User;
 
@@ -9,7 +10,7 @@ import java.util.Optional;
 public interface RoleService {
 
 
-    Optional<Role> getRole(String role);
+    Mono<Role> getRole(String role);
 
     Optional<Role> getById(Long id);
 

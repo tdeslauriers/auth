@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.Role;
 import world.deslauriers.model.database.User;
 import world.deslauriers.model.database.UserRole;
@@ -30,8 +31,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Optional<Role> getRole(String role){
-
+    public Mono<Role> getRole(String role){
         return roleRepository.findByRole(role);
     }
 

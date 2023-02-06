@@ -2,7 +2,6 @@ package world.deslauriers.controller;
 
 import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpResponse;
-import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
@@ -43,60 +42,48 @@ public class ProfileController {
     @Put("/user")
     Mono<HttpResponse<?>> updateProfile(@Body @Valid ProfileDto updatedProfile, Principal principal){
 
-        var existing = userService.lookupUserByUsername(principal.getName());
-
-        if (existing.isEmpty()){
-            log.warn("Attempt to edit non-existent user: " + principal.getName());
-            return HttpResponse.status(HttpStatus.BAD_REQUEST).body("User does not exist.");
-        }
-
         // may only update your own record.
-        return userService.updateUser(existing.get(), new ProfileDto(
-                existing.get().id(),
-                existing.get().username(),
-                updatedProfile.firstname(),
-                updatedProfile.lastname(),
-                existing.get().dateCreated(),
-                existing.get().enabled(),
-                existing.get().accountExpired(),
-                existing.get().accountLocked(),
-                updatedProfile.birthday(),
-                existing.get().uuid(),
-                null,  // user not allowed to update roles.
-                updatedProfile.addresses(),
-                updatedProfile.phones()))
+        // may only update specific fields.
+        return userService.getUserByUsername(principal.getName())
+                .flatMap(user -> userService.updateUser(user, new ProfileDto(
+                        user.id(),
+                        user.username(),
+                        updatedProfile.firstname(),
+                        updatedProfile.lastname(),
+                        user.dateCreated(),
+                        user.enabled(),
+                        user.accountExpired(),
+                        user.accountLocked(),
+                        updatedProfile.birthday(),
+                        user.uuid(),
+                        null,  // user not allowed to update roles.
+                        updatedProfile.addresses(),
+                        updatedProfile.phones())))
                 .thenReturn(HttpResponse
                         .noContent()
                         .header(HttpHeaders.LOCATION, URI.create("/user").getPath()));
-
     }
 
     // admin
     @Secured({"PROFILE_ADMIN"})
     @Get
     Flux<ProfileDto> getAll(){
-
         return userService.getAllUsers();
     }
 
     @Secured({"PROFILE_ADMIN", "PROFILE_READ"})
     @Get("/{uuid}")
     Mono<ProfileDto> getByUuid(String uuid){
-
         return userService.getProfileByUuid(uuid);
     }
 
     @Secured({"PROFILE_ADMIN"})
     @Put("/edit")
     Mono<HttpResponse<?>> updateUser(@Body @Valid ProfileDto updatedProfile){
-
-        var user = userService.lookupUserById(updatedProfile.id());
-
-        if (user.isEmpty()){
-            log.error("Attempt to edit invalid User Id: " + updatedProfile.id() + " - does not exist.");
-            throw new IllegalArgumentException("Invalid user Id.");
-        }
-
-        return HttpResponse.ok().body(userService.updateUser(user.get(), updatedProfile).get());
+        return userService.getUserById(updatedProfile.id())
+                .flatMap(user -> userService.updateUser(user, updatedProfile))
+                .thenReturn(HttpResponse
+                        .noContent()
+                        .header(HttpHeaders.LOCATION, URI.create("/edit").getPath()));
     }
 }
