@@ -1,6 +1,5 @@
 package world.deslauriers.service;
 
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,34 +20,17 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService{
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
-
-    @Inject
     private final UserRepository userRepository;
-
-    @Inject
     private final UserRoleRepository userRoleRepository;
-
-    @Inject
     private final RoleService roleService;
-
-    @Inject
-    private final AddressService addressService;
-
-    @Inject
-    private final PhoneService phoneService;
-
-    @Inject
     private final PasswordEncoderService passwordEncoderService;
 
-    public UserServiceImpl(UserRepository userRepository, UserRoleRepository userRoleRepository, RoleService roleService, AddressService addressService, PhoneService phoneService, PasswordEncoderService passwordEncoderService) {
+    public UserServiceImpl(UserRepository userRepository, UserRoleRepository userRoleRepository, RoleService roleService, PasswordEncoderService passwordEncoderService) {
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
         this.roleService = roleService;
-        this.addressService = addressService;
-        this.phoneService = phoneService;
         this.passwordEncoderService = passwordEncoderService;
     }
-
 
     @Override
     public Mono<User> getUserByUsername(String email) {
