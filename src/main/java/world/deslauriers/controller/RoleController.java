@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.Role;
+import world.deslauriers.model.dto.RoleDto;
 import world.deslauriers.service.RoleService;
 
 import javax.validation.Valid;
@@ -37,16 +38,16 @@ public class RoleController {
     }
 
     @Put
-    Mono<HttpResponse<?>> updateRole(@Body @Valid Role role){
-        return roleService.update(role)
+    Mono<HttpResponse<?>> updateRole(@Body @Valid RoleDto cmd){
+        return roleService.update(cmd)
                 .map(r -> HttpResponse
                         .noContent()
                         .header(HttpHeaders.LOCATION, location(r.id()).getPath()));
     }
 
     @Post
-    Mono<HttpResponse<Role>> save(@Valid @Body Role role){
-        return roleService.save(role)
+    Mono<HttpResponse<Role>> save(@Valid @Body RoleDto cmd){
+        return roleService.save(cmd)
             .map(r -> HttpResponse
                     .created(r)
                     .headers(headers -> headers.location(location(r.id()))));

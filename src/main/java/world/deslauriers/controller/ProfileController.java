@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import world.deslauriers.model.profile.ProfileDto;
+import world.deslauriers.model.dto.ProfileDto;
 import world.deslauriers.service.UserService;
 
 import javax.validation.Valid;

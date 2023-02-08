@@ -3,11 +3,9 @@ package world.deslauriers.service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.User;
-import world.deslauriers.model.profile.ProfileDto;
+import world.deslauriers.model.dto.ProfileDto;
 import world.deslauriers.model.registration.RegistrationDto;
 import world.deslauriers.model.registration.RegistrationResponseDto;
-
-import java.util.Optional;
 
 public interface UserService {
 

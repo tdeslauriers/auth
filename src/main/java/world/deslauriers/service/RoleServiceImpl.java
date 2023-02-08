@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.Role;
 import world.deslauriers.model.database.User;
 import world.deslauriers.model.database.UserRole;
+import world.deslauriers.model.dto.RoleDto;
 import world.deslauriers.repository.RoleRepository;
 import world.deslauriers.repository.UserRoleRepository;
 
@@ -42,13 +43,13 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Mono<Role> save(Role role){
-        return roleRepository.save(new Role(role.role().toUpperCase(), role.title(), role.description()));
+    public Mono<Role> save(RoleDto cmd){
+        return roleRepository.save(new Role(cmd.role().toUpperCase(), cmd.title(), cmd.description()));
     }
 
     @Override
-    public Mono<Role> update(Role role){
-        return roleRepository.update(new Role(role.id(), role.role().toUpperCase(), role.title(), role.description()));
+    public Mono<Role> update(RoleDto cmd){
+        return roleRepository.update(new Role(cmd.id(), cmd.role().toUpperCase(), cmd.title(), cmd.description()));
     }
 
     @Override

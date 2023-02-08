@@ -1,4 +1,4 @@
-package world.deslauriers.model.profile;
+package world.deslauriers.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.micronaut.core.annotation.NonNull;

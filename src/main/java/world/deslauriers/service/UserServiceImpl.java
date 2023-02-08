@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.*;
-import world.deslauriers.model.profile.ProfileDto;
+import world.deslauriers.model.dto.ProfileDto;
 import world.deslauriers.model.registration.RegistrationDto;
 import world.deslauriers.model.registration.RegistrationResponseDto;
 import world.deslauriers.repository.UserRepository;
@@ -74,27 +74,31 @@ public class UserServiceImpl implements UserService{
     public Mono<RegistrationResponseDto> registerUser(RegistrationDto registrationDto){
 
         return userRepository.findByUsername(registrationDto.username())
-                .flatMap(existsUser -> Mono.just(( new RegistrationResponseDto(400, "Bad Request", "Username unavailable", "/register")))
+                .flatMap(existsUser -> Mono.just(( new RegistrationResponseDto(400, "Bad Request", "Username unavailable", "/register"))))
                 .switchIfEmpty(Mono.defer(() -> {
                     if (!registrationDto.password().equals(registrationDto.confirmPassword())){
                         return Mono.just(new RegistrationResponseDto(400, "Bad Request", "Passwords do not match.", "/register"));
                     }
                     return userRepository.save(new User(
-                            registrationDto.username(),
-                            passwordEncoderService.encode(registrationDto.password()),
-                            registrationDto.firstname(),
-                            registrationDto.lastname(),
-                            LocalDate.now(),
-                            true , // set enabled to false when create email verification
-                            false,
-                            false,
-                            UUID.randomUUID().toString()))
-                            .flatMap(user -> userRoleRepository.save(new UserRole(user, roleService.getRole("GENERAL_ADMISSION").block())))
+                                    registrationDto.username(),
+                                    passwordEncoderService.encode(registrationDto.password()),
+                                    registrationDto.firstname(),
+                                    registrationDto.lastname(),
+                                    LocalDate.now(),
+                                    true , // set enabled to false when create email verification
+                                    false,
+                                    false,
+                                    UUID.randomUUID().toString()))
+                            .flatMap(user -> {
+                                log.info("User registered: {}", user.username());
+                                return roleService.getRole("GENERAL_ADMISSION")
+                                        .flatMap(role -> userRoleRepository.save(new UserRole(user, role)));
+                            })
                             .flatMap(userRole -> {
-                                log.info("Registered user: {} with the baseline scope: {}", userRole.user().username(), userRole.role().role());
+                                log.info("Assigned user: {} baseline scope: {}", userRole.user().username(), userRole.role().role());
                                 return Mono.just(new RegistrationResponseDto(201, null, "Registration successful: " + userRole.user().username(), "/register"));
                             });
-                })));
+        }));
     }
 
     // user

@@ -1,6 +1,7 @@
 package world.deslauriers.model.database;
 
 import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.annotation.GeneratedValue;
 import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.MappedEntity;
@@ -25,6 +26,7 @@ public record Address(
         @NonNull @NotBlank @UsState @Size(min = 2, max = 2) String state,
         @NotNull @NotBlank @NumbersOnly @Size(min = 5, max = 5) String zip,
 
+        @Nullable
         @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "address")
         Set<UserAddress> userAddresses
 

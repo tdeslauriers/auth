@@ -1,4 +1,4 @@
-package world.deslauriers.model.profile;
+package world.deslauriers.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.micronaut.core.annotation.NonNull;
@@ -26,12 +26,10 @@ public record ProfileDto(
         Boolean accountExpired,
         Boolean accountLocked,
         @JsonFormat(pattern="yyyy-MM-dd") @Nullable LocalDate birthday,
-        String uuid,
-        HashSet<Role> roles,
-        HashSet<Address> addresses,
-        HashSet<Phone> phones
+        @Nullable String uuid,
+        @Nullable HashSet<Role> roles,
+        @Nullable HashSet<Address> addresses,
+        @Nullable HashSet<Phone> phones
 ) {
-    public ProfileDto(Long id, @NonNull String username, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, String uuid) {
-        this(id, username, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, null, uuid, null, null, null);
-    }
+
 }

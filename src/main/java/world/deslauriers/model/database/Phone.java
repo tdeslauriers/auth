@@ -1,6 +1,7 @@
 package world.deslauriers.model.database;
 
 import io.micronaut.core.annotation.NonNull;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.annotation.GeneratedValue;
 import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.MappedEntity;
@@ -21,6 +22,7 @@ public record Phone(
         @NonNull @NumbersOnly @Size(min = 9, max = 32) String phone,
         @NonNull @ValidPhoneType @Size(min = 4, max= 4) String type,
 
+        @Nullable
         @Relation(value = Kind.ONE_TO_MANY, mappedBy = "phone")
         Set<UserPhone> userPhones
 ) {

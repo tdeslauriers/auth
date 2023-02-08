@@ -4,7 +4,7 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import world.deslauriers.model.database.*;
-import world.deslauriers.model.profile.ProfileDto;
+import world.deslauriers.model.dto.ProfileDto;
 import world.deslauriers.repository.UserRepository;
 import world.deslauriers.repository.UserRoleRepository;
 
