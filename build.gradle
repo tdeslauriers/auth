@@ -47,12 +47,8 @@ dependencies {
     implementation("io.micronaut.sql:micronaut-jdbc-hikari")
     implementation("jakarta.annotation:jakarta.annotation-api")
 
-    // ssl netty issue: does not like self-signed out of the box
-    implementation("org.bouncycastle:bcpkix-jdk15on:$bouncyCastleVersion")
-
     // password encoding
-    implementation("org.springframework.security:" +
-            "spring-security-crypto:$springSecCryptoVersion")
+    implementation("org.springframework.security:spring-security-crypto:$springSecCryptoVersion")
     implementation("commons-logging:commons-logging:1.2") // spring bcrypt source code impl uses apache commons LogFactory.
     //password validation
     implementation("org.passay:passay:$passayVersion")
