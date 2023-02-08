@@ -1,23 +1,25 @@
 package world.deslauriers.service;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.Role;
 import world.deslauriers.model.database.User;
+import world.deslauriers.model.dto.RoleDto;
 
 import java.util.HashSet;
-import java.util.Optional;
 
 public interface RoleService {
 
 
-    Optional<Role> getRole(String role);
+    Mono<Role> getRole(String role);
 
-    Optional<Role> getById(Long id);
+    Mono<Role> getById(Long id);
 
-    Iterable<Role> getAllRoles();
+    Flux<Role> getAllRoles();
 
-    Role update(Role role);
+    Mono<Role> update(RoleDto cmd);
 
-    Role save(Role role);
+    Mono<Role> save(RoleDto cmd);
 
     void resolveRoles(HashSet<Role> roles, User user);
 }

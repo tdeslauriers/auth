@@ -4,18 +4,6 @@ micronaut:
   server:
     cors:
       enabled: true
-#      configurations:
-#        web:
-#          allowedOrigins:
-#            - ${CORS_URLS}
-#  ssl:
-#    enabled: true
-#    build-self-signed: true
-#  http:
-#    client:
-#      ssl:
-#        enabled: true
-#        build-self-signed: true
   security:
     authentication: bearer
     token:
@@ -24,6 +12,15 @@ micronaut:
           secret:
             generator:
               secret: ${JWT_GENERATOR_SIGNATURE_SECRET}
+---
+r2dbc:
+  datasources:
+    default:
+      url: ${AUTH_R2DBC_URL}
+      username: ${AUTH_JDBC_USERNAME}
+      password: ${AUTH_JDBC_PASSWORD}
+      dialect: ${AUTH_JDBC_DIALECT}
+#    url: ${BACKUP_AUTH_R2DBC_URL} # backup
 datasources:
   default:
     url: ${AUTH_JDBC_URL}
@@ -33,12 +30,12 @@ datasources:
 #    url: ${BACKUP_AUTH_JDBC_URL} # pushes the flyway schema
 #    username: ${BACKUP_AUTH_JDBC_USERNAME}
 #    password: ${BACKUP_AUTH_JDBC_PASSWORD}
-
+---
 flyway:
   datasources:
     default:
       enabled: true
-
+---
 netty:
   default:
     allocator:

@@ -13,6 +13,7 @@ import io.micronaut.runtime.Micronaut;
         labels = @Label(key = "app", value = "auth"),
         ports = @Port(name = "http", hostPort = 8080, containerPort = 8080),
         envVars = {
+                @Env(name = "AUTH_R2DBC_URL", configmap = "auth-svc-config", value = "r2dbc_url"),
                 @Env(name = "AUTH_JDBC_URL", configmap = "auth-svc-config", value = "jdbc_url"),
                 @Env(name = "AUTH_JDBC_USERNAME", configmap = "auth-svc-config", value = "jdbc_username"),
                 @Env(name = "AUTH_JDBC_DRIVER", configmap = "auth-svc-config", value = "jdbc_driver"),

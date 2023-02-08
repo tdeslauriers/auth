@@ -3,25 +3,21 @@ package world.deslauriers.service;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.security.authentication.*;
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Singleton
 public class DelegatingAuthProviderImpl implements AuthenticationProvider {
 
-    @Inject
     private final UserService userService;
-
-    @Inject
     private final PasswordEncoderService passwordEncoderService;
 
     public DelegatingAuthProviderImpl(UserService userService, PasswordEncoderService passwordEncoderService) {
@@ -35,51 +31,44 @@ public class DelegatingAuthProviderImpl implements AuthenticationProvider {
             AuthenticationRequest<?, ?> authenticationRequest) {
 
         return Flux.create(emitter -> {
-
-                    var user = fetchUser(authenticationRequest);
+                    var user = fetchUser(authenticationRequest).block();
                     var authFailed = validate(user, authenticationRequest);
-                    if (authFailed.isPresent()){
-
-                        emitter.error(new AuthenticationException(authFailed.get()));
+                    if (authFailed != null){
+                        emitter.error(new AuthenticationException(authFailed));
                     } else {
-
-                        emitter.next(createSuccessfulAuthResponse(user.get()));
+                        emitter.next(createSuccessfulAuthResponse(user)); // null check in validate
                         emitter.complete();
                     }
                 }, FluxSink.OverflowStrategy.ERROR);
     }
 
     // get user from db if exist
-    private Optional<User> fetchUser(AuthenticationRequest authenticationRequest) {
-
+    private Mono<User> fetchUser(AuthenticationRequest authenticationRequest) {
         final String username = authenticationRequest.getIdentity().toString();
-        return userService.lookupUserByUsername(username);
+        return userService.getUserByUsername(username);
     }
 
     // check user is enabled, etc, + pw matches != false
-    private Optional<AuthenticationFailed> validate(
-            Optional<User> user, AuthenticationRequest authenticationRequest){
+    private AuthenticationFailed validate(User user, AuthenticationRequest authenticationRequest){
 
         AuthenticationFailed authenticationFailed = null;
-        if (user.isEmpty()){
-
+        if (user == null){
             authenticationFailed = new AuthenticationFailed(AuthenticationFailureReason.USER_NOT_FOUND);
-        } else if (!user.get().enabled()) {
 
+        } else if (!user.enabled()) {
             authenticationFailed = new AuthenticationFailed(AuthenticationFailureReason.USER_DISABLED);
-        } else if (user.get().accountExpired()){
 
+        } else if (user.accountExpired()){
             authenticationFailed = new AuthenticationFailed(AuthenticationFailureReason.ACCOUNT_EXPIRED);
-        } else if (user.get().accountLocked()){
 
+        } else if (user.accountLocked()){
             authenticationFailed = new AuthenticationFailed(AuthenticationFailureReason.ACCOUNT_LOCKED);
-        } else if (!passwordEncoderService.matches(
-                authenticationRequest.getSecret().toString(), user.get().password())){
 
+        } else if (!passwordEncoderService.matches(authenticationRequest.getSecret().toString(), user.password())){
             authenticationFailed = new AuthenticationFailed(AuthenticationFailureReason.CREDENTIALS_DO_NOT_MATCH);
         }
 
-        return Optional.ofNullable(authenticationFailed);
+        return authenticationFailed;
     }
 
     // successful login
@@ -87,7 +76,6 @@ public class DelegatingAuthProviderImpl implements AuthenticationProvider {
 
         List<String> authorities = new ArrayList<>();
         user.userRoles().forEach(userRole -> {
-
             authorities.add(userRole.role().role());
         });
 

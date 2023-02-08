@@ -1,25 +1,20 @@
 package world.deslauriers.service;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.User;
-import world.deslauriers.model.profile.ProfileDto;
+import world.deslauriers.model.dto.ProfileDto;
 import world.deslauriers.model.registration.RegistrationDto;
-
-import java.util.Optional;
+import world.deslauriers.model.registration.RegistrationResponseDto;
 
 public interface UserService {
 
-    Boolean userExists(String email);
-    String registerUser(RegistrationDto registrationDto);
-
-    Optional<User> lookupUserByUsername(String email);
-    Optional<User> lookupUserById(Long id);
-
-    Iterable<User> backupAll();
-
-    Iterable<ProfileDto> getAllUsers();
-
-    Optional<ProfileDto> getProfile(String username);
-    Optional<ProfileDto> getProfileByUuid(String uuid);
-
-    Optional<ProfileDto> updateUser(User user, ProfileDto updatedProfile);
+    Mono<RegistrationResponseDto> registerUser(RegistrationDto registrationDto);
+    Mono<User> getUserByUsername(String email);
+    Mono<User> getUserById(Long id);
+    Flux<User> backupAll();
+    Flux<ProfileDto> getAllUsers();
+    Mono<ProfileDto> getProfile(String username);
+    Mono<ProfileDto> getProfileByUuid(String uuid);
+    Mono<User> updateUser(User user, ProfileDto updatedProfile);
 }

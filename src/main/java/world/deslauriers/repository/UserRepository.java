@@ -2,15 +2,15 @@ package world.deslauriers.repository;
 
 import io.micronaut.data.annotation.Join;
 import io.micronaut.data.annotation.Query;
-import io.micronaut.data.jdbc.annotation.JdbcRepository;
 import io.micronaut.data.model.query.builder.sql.Dialect;
-import io.micronaut.data.repository.PageableRepository;
+import io.micronaut.data.r2dbc.annotation.R2dbcRepository;
+import io.micronaut.data.repository.reactive.ReactorCrudRepository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.User;
 
-import java.util.Optional;
-
-@JdbcRepository(dialect = Dialect.MYSQL)
-public interface UserRepository extends PageableRepository<User, Long> {
+@R2dbcRepository(dialect = Dialect.MYSQL)
+public interface UserRepository extends ReactorCrudRepository<User, Long> {
 
     @Join(value = "userRoles", type = Join.Type.LEFT_FETCH)
     @Join(value = "userRoles.role", type = Join.Type.LEFT_FETCH)
@@ -18,10 +18,10 @@ public interface UserRepository extends PageableRepository<User, Long> {
     @Join(value = "userAddresses.address", type = Join.Type.LEFT_FETCH)
     @Join(value = "userPhones", type = Join.Type.LEFT_FETCH)
     @Join(value = "userPhones.phone", type = Join.Type.LEFT_FETCH)
-    Optional<User> findByUsername(String email);
+    Mono<User> findByUsername(String email);
 
     @Query("SELECT username FROM user u WHERE username = :email")
-    Optional<String> findUsername(String email);
+    Mono<String> findUsername(String email);
 
     @Join(value = "userRoles", type = Join.Type.LEFT_FETCH)
     @Join(value = "userRoles.role", type = Join.Type.LEFT_FETCH)
@@ -29,7 +29,7 @@ public interface UserRepository extends PageableRepository<User, Long> {
     @Join(value = "userAddresses.address", type = Join.Type.LEFT_FETCH)
     @Join(value = "userPhones", type = Join.Type.LEFT_FETCH)
     @Join(value = "userPhones.phone", type = Join.Type.LEFT_FETCH)
-    Optional<User> findById(Long id);
+    Mono<User> findById(Long id);
 
     @Join(value = "userRoles", type = Join.Type.LEFT_FETCH)
     @Join(value = "userRoles.role", type = Join.Type.LEFT_FETCH)
@@ -37,7 +37,7 @@ public interface UserRepository extends PageableRepository<User, Long> {
     @Join(value = "userAddresses.address", type = Join.Type.LEFT_FETCH)
     @Join(value = "userPhones", type = Join.Type.LEFT_FETCH)
     @Join(value = "userPhones.phone", type = Join.Type.LEFT_FETCH)
-    Iterable<User> findAll();
+    Flux<User> findAll();
 
     @Join(value = "userRoles", type = Join.Type.LEFT_FETCH)
     @Join(value = "userRoles.role", type = Join.Type.LEFT_FETCH)
@@ -45,5 +45,5 @@ public interface UserRepository extends PageableRepository<User, Long> {
     @Join(value = "userAddresses.address", type = Join.Type.LEFT_FETCH)
     @Join(value = "userPhones", type = Join.Type.LEFT_FETCH)
     @Join(value = "userPhones.phone", type = Join.Type.LEFT_FETCH)
-    Optional<User> findByUuid(String uuid);
+    Mono<User> findByUuid(String uuid);
 }

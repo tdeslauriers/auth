@@ -1,17 +1,16 @@
-package world.deslauriers.model.profile;
+package world.deslauriers.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
+import io.micronaut.serde.annotation.Serdeable;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
-@Introspected
+@Serdeable
 public record UserDto(
         @NonNull Long id,
         @NonNull @NotBlank @Email @Size(max = 255) String username,

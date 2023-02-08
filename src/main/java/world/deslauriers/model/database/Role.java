@@ -1,18 +1,20 @@
 package world.deslauriers.model.database;
 
-import io.micronaut.core.annotation.Introspected;
+import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.annotation.GeneratedValue;
 import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.MappedEntity;
 import io.micronaut.data.annotation.Relation;
-import io.micronaut.data.jdbc.annotation.JoinTable;
+import io.micronaut.serde.annotation.Serdeable;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Set;
 
-@Introspected
+import static io.micronaut.data.annotation.Relation.Kind;
+
+@Serdeable
 @MappedEntity
 public record Role(
         @Id @GeneratedValue Long id,
@@ -20,8 +22,8 @@ public record Role(
         @NotNull @NotBlank @Size(min = 2, max = 32) String title,
         @NotNull @NotBlank @Size(min = 2, max = 64) String description,
 
-        @Relation(value = Relation.Kind.ONE_TO_MANY, mappedBy = "role")
-        @JoinTable(name = "user_role")
+        @Nullable
+        @Relation(value = Kind.ONE_TO_MANY, mappedBy = "role")
         Set<UserRole> userRoles
 ) {
         public Role(String role, String title, String description) {
