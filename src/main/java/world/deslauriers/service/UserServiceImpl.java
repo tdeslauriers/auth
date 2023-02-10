@@ -58,9 +58,11 @@ public class UserServiceImpl implements UserService{
         return userRepository.findByUsername(registrationDto.username())
                 .flatMap(existsUser -> Mono.just(( new RegistrationResponseDto(400, "Bad Request", "Username unavailable", "/register"))))
                 .switchIfEmpty(Mono.defer(() -> {
+
                     if (!registrationDto.password().equals(registrationDto.confirmPassword())){
                         return Mono.just(new RegistrationResponseDto(400, "Bad Request", "Passwords do not match.", "/register"));
                     }
+
                     return userRepository.save(new User(
                                     registrationDto.username(),
                                     passwordEncoderService.encode(registrationDto.password()),

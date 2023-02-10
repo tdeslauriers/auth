@@ -32,12 +32,13 @@ public class RegistrationController {
 
     @Post
     Mono<MutableHttpResponse<RegistrationResponseDto>> register(@Body @Valid RegistrationDto registrationDto){
-
+        log.info("Registration controller fired.");
         return userService.registerUser(registrationDto)
                 .map(registrationResponseDto -> {
-//                    if (!registrationResponseDto.status().equals(201)) {
-//                        return HttpResponse.status(HttpStatus.BAD_REQUEST).body(registrationResponseDto);
-//                    }
+                    if (!registrationResponseDto.status().equals(201)) {
+                        log.warn("Registration failed.");
+                        return HttpResponse.status(HttpStatus.BAD_REQUEST).body(registrationResponseDto);
+                    }
                     return HttpResponse.status(HttpStatus.CREATED).body(registrationResponseDto);
                 });
     }

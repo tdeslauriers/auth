@@ -4,6 +4,11 @@ micronaut:
   server:
     cors:
       enabled: true
+  netty:
+    event-loops:
+      other:
+        num-threads: 10
+        prefer-native-transport: true
   security:
     authentication: bearer
     token:
