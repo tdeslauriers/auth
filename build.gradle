@@ -30,15 +30,16 @@ micronaut {
 
 dependencies {
     annotationProcessor("io.dekorate:kubernetes-annotations:${dekorateVersion}")
+    annotationProcessor("io.micronaut.data:micronaut-data-processor")
     annotationProcessor("io.micronaut:micronaut-http-validation")
     annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
     annotationProcessor("io.micronaut.security:micronaut-security-annotations")
 
     implementation("io.dekorate:kubernetes-annotations:${dekorateVersion}")
     implementation("io.micronaut.security:micronaut-security-jwt")
+    implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-management")
     implementation("io.micronaut:micronaut-validation")
-    implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut.reactor:micronaut-reactor")
     implementation("io.micronaut.reactor:micronaut-reactor-http-client")
     implementation("io.micronaut.serde:micronaut-serde-jackson")
@@ -47,9 +48,10 @@ dependencies {
     implementation("io.micronaut.sql:micronaut-jdbc-hikari")
     implementation("jakarta.annotation:jakarta.annotation-api")
 
-    // password encoding
-    implementation("org.springframework.security:spring-security-crypto:$springSecCryptoVersion")
-    implementation("commons-logging:commons-logging:1.2") // spring bcrypt source code impl uses apache commons LogFactory.
+    // password encoding: manually implemented so I could switch out the logger
+    // graalvm wont do apache commons.
+//    implementation("org.springframework.security:spring-security-crypto:$springSecCryptoVersion")
+//    implementation("commons-logging:commons-logging:1.2") // spring bcrypt source code impl uses apache commons LogFactory.
     //password validation
     implementation("org.passay:passay:$passayVersion")
 
@@ -76,17 +78,6 @@ java {
 }
 
 graalvmNative.toolchainDetection = false
-micronaut {
-    runtime("netty")
-    testRuntime("junit5")
-    processing {
-        incremental(true)
-        annotations("world.deslauriers.*")
-    }
-    testResources {
-        additionalModules.add("hibernate-reactive-mariadb")
-    }
-}
 
 test {
     testLogging{

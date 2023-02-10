@@ -16,9 +16,7 @@ import io.micronaut.runtime.Micronaut;
                 @Env(name = "AUTH_R2DBC_URL", configmap = "auth-svc-config", value = "r2dbc_url"),
                 @Env(name = "AUTH_JDBC_URL", configmap = "auth-svc-config", value = "jdbc_url"),
                 @Env(name = "AUTH_JDBC_USERNAME", configmap = "auth-svc-config", value = "jdbc_username"),
-                @Env(name = "AUTH_JDBC_DRIVER", configmap = "auth-svc-config", value = "jdbc_driver"),
                 @Env(name = "AUTH_JDBC_DIALECT", configmap = "auth-svc-config", value = "jdbc_dialect"),
-                @Env(name = "CORS_URL", configmap = "auth-svc-config", value = "cors_url"),
                 @Env(name = "AUTH_JDBC_PASSWORD", secret = "auth-mariadb", value = "mariadb-password"),
                 @Env(name = "JWT_GENERATOR_SIGNATURE_SECRET", secret = "jwt", value = "signature-pw")
         }
