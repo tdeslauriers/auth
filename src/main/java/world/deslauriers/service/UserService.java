@@ -2,8 +2,10 @@ package world.deslauriers.service;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import world.deslauriers.model.database.PasswordHistory;
 import world.deslauriers.model.database.User;
 import world.deslauriers.model.dto.ProfileDto;
+import world.deslauriers.model.dto.ResetPasswordCmd;
 import world.deslauriers.model.registration.RegistrationDto;
 import world.deslauriers.model.registration.RegistrationResponseDto;
 
@@ -17,4 +19,5 @@ public interface UserService {
     Mono<ProfileDto> getProfile(String username);
     Mono<ProfileDto> getProfileByUuid(String uuid);
     Mono<User> updateUser(User user, ProfileDto updatedProfile);
+    Mono<?> resetPassword(User user, ResetPasswordCmd cmd);
 }

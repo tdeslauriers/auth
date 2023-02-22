@@ -1,5 +1,10 @@
 package world.deslauriers.service;
 
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.exceptions.HttpStatusException;
+import io.micronaut.security.authentication.AuthenticationException;
+import io.micronaut.security.authentication.AuthenticationFailed;
+import io.micronaut.security.authentication.AuthenticationFailureReason;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,8 +12,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.*;
 import world.deslauriers.model.dto.ProfileDto;
+import world.deslauriers.model.dto.ResetPasswordCmd;
 import world.deslauriers.model.registration.RegistrationDto;
 import world.deslauriers.model.registration.RegistrationResponseDto;
+import world.deslauriers.repository.PasswordHistoryRepository;
 import world.deslauriers.repository.UserRepository;
 import world.deslauriers.repository.UserRoleRepository;
 
@@ -22,12 +29,14 @@ public class UserServiceImpl implements UserService{
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
+    private final PasswordHistoryRepository passwordHistoryRepository;
     private final RoleService roleService;
     private final PasswordEncoderService passwordEncoderService;
 
-    public UserServiceImpl(UserRepository userRepository, UserRoleRepository userRoleRepository, RoleService roleService, PasswordEncoderService passwordEncoderService) {
+    public UserServiceImpl(UserRepository userRepository, UserRoleRepository userRoleRepository, PasswordHistoryRepository passwordHistoryRepository, RoleService roleService, PasswordEncoderService passwordEncoderService) {
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
+        this.passwordHistoryRepository = passwordHistoryRepository;
         this.roleService = roleService;
         this.passwordEncoderService = passwordEncoderService;
     }
@@ -134,17 +143,17 @@ public class UserServiceImpl implements UserService{
             }
 
             return userRepository.update(new User(
-                    user.id(),
-                    updatedProfile.username(),
-                    user.password(),
-                    updatedProfile.firstname(),
-                    updatedProfile.lastname(),
-                    user.dateCreated(),
-                    updatedProfile.enabled(),
-                    updatedProfile.accountExpired(),
-                    updatedProfile.accountLocked(),
-                    updatedProfile.birthday(),
-                    user.uuid()));
+                                            user.id(),
+                                            updatedProfile.username(),
+                                            user.password(),
+                                            updatedProfile.firstname(),
+                                            updatedProfile.lastname(),
+                                            user.dateCreated(),
+                                            updatedProfile.enabled(),
+                                            updatedProfile.accountExpired(),
+                                            updatedProfile.accountLocked(),
+                                            updatedProfile.birthday(),
+                                            user.uuid()));
 
 
 //            if (updatedProfile.addresses() != null){
@@ -156,6 +165,59 @@ public class UserServiceImpl implements UserService{
 //            }
 //
 
+    }
+
+    @Override
+    public Mono<?> resetPassword(User user, ResetPasswordCmd cmd) {
+
+        if(!cmd.updated().equals(cmd.confirm())){
+            log.error("Password reset attempted where passwords do not match for user {}", user.username());
+            return Mono.error(new HttpStatusException(HttpStatus.BAD_REQUEST, "New Passwords do not match"));
+        }
+        // null checked by @Valid in request body
+        // check if password matches
+        if (!passwordEncoderService.matches(cmd.current(), user.password())){
+            log.error("Password reset attempted with incorrect password for user: {}", user.username());
+            return Mono.error(new AuthenticationException(new AuthenticationFailed(AuthenticationFailureReason.CREDENTIALS_DO_NOT_MATCH)));
+        }
+        // make sure not the same as current
+        if (cmd.current().equals(cmd.updated())){
+            log.error("Password reset attempted where updated password matched a password from history for user {}", user.username());
+            return Mono.error(new HttpStatusException(HttpStatus.BAD_REQUEST, "New password cannot match any of the previous 12 iterations."));
+        }
+
+        // complexity checked by dto
+        return passwordHistoryRepository.findByUserOrderByUpdatedDesc(user)
+                        .collectList()
+                        .map(passwordHistories -> {
+                            if (passwordHistories.size() > 12) {
+                                passwordHistories = passwordHistories.subList(0, 11);
+                            }
+                            return passwordHistories
+                                    .stream()
+                                    .anyMatch(passwordHistory -> passwordEncoderService.matches(cmd.updated(), passwordHistory.password()));
+                        })
+                        .flatMap(exists -> {
+                            if (exists) {
+                                return Mono.error(new HttpStatusException(HttpStatus.BAD_REQUEST, "New password cannot match any of the previous 12 iterations."));
+                            }
+                            return userRepository.update(new User(
+                                    user.id(),
+                                    user.username(),
+                                    passwordEncoderService.encode(cmd.updated()),
+                                    user.firstname(),
+                                    user.lastname(),
+                                    user.dateCreated(),
+                                    user.enabled(),
+                                    user.accountExpired(),
+                                    user.accountLocked(),
+                                    user.birthday(),
+                                    user.uuid()));
+                        })
+                        .flatMap(u -> {
+                            log.info("Reset user {} {}'s ({}) password.", u.firstname(), u.lastname(), u.username());
+                            return passwordHistoryRepository.save(new PasswordHistory(user.password(), LocalDate.now(), u));
+                        });
     }
 
     private ProfileDto buildProfile(User user){
@@ -184,4 +246,6 @@ public class UserServiceImpl implements UserService{
                 addresses,
                 phones);
     }
+
 }
+

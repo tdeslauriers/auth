@@ -2,17 +2,19 @@ package world.deslauriers.controller;
 
 import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpResponse;
-import io.micronaut.http.annotation.Body;
-import io.micronaut.http.annotation.Controller;
-import io.micronaut.http.annotation.Get;
-import io.micronaut.http.annotation.Put;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.http.MutableHttpResponse;
+import io.micronaut.http.annotation.*;
 import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.authentication.AuthenticationException;
 import io.micronaut.security.rules.SecurityRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import world.deslauriers.model.database.User;
 import world.deslauriers.model.dto.ProfileDto;
+import world.deslauriers.model.dto.ResetPasswordCmd;
 import world.deslauriers.service.UserService;
 
 import javax.validation.Valid;
@@ -64,6 +66,17 @@ public class ProfileController {
                         .header(HttpHeaders.LOCATION, URI.create("/user").getPath()));
     }
 
+    @Post("/reset")
+    Mono<HttpResponse<?>> resetPassword(@Body @Valid ResetPasswordCmd cmd, Principal principal){
+
+        // can only reset your own pw.
+        // complexity standards will be executed by @Valid
+        return userService.getUserByUsername(principal.getName())
+                .flatMap(user -> userService.resetPassword(user, cmd))  // exceptions handled/thrown in service.
+                .thenReturn(HttpResponse.noContent());
+
+    }
+
     // admin
     @Secured({"PROFILE_ADMIN"})
     @Get
@@ -80,6 +93,7 @@ public class ProfileController {
     @Secured({"PROFILE_ADMIN"})
     @Put("/edit")
     Mono<HttpResponse<?>> updateUser(@Body @Valid ProfileDto updatedProfile){
+
         return userService.getUserById(updatedProfile.id())
                 .flatMap(user -> userService.updateUser(user, updatedProfile))
                 .thenReturn(HttpResponse

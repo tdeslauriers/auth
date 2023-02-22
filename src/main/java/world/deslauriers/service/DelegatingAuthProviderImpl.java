@@ -16,7 +16,6 @@ import java.util.List;
 
 @Singleton
 public class DelegatingAuthProviderImpl implements AuthenticationProvider {
-
     private final UserService userService;
     private final PasswordEncoderService passwordEncoderService;
 
@@ -50,7 +49,6 @@ public class DelegatingAuthProviderImpl implements AuthenticationProvider {
 
     // check user is enabled, etc, + pw matches != false
     private AuthenticationFailed validate(User user, AuthenticationRequest authenticationRequest){
-
         AuthenticationFailed authenticationFailed = null;
         if (user == null){
             authenticationFailed = new AuthenticationFailed(AuthenticationFailureReason.USER_NOT_FOUND);

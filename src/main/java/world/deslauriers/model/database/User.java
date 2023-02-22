@@ -2,6 +2,7 @@ package world.deslauriers.model.database;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.data.annotation.*;
@@ -41,21 +42,26 @@ public record User(
         Set<UserAddress> userAddresses,
 
         @Relation(value = Kind.ONE_TO_MANY, mappedBy = "user")
-        Set<UserPhone> userPhones
+        Set<UserPhone> userPhones,
+
+        @Nullable
+        @JsonIgnore
+        @Relation(value = Kind.ONE_TO_MANY, mappedBy = "user")
+        Set<PasswordHistory> passwordHistories
 ) {
         public User(@NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, @Nullable LocalDate birthday, @NonNull String uuid) {
-                this(null, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, birthday, uuid, null, null, null);
+                this(null, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, birthday, uuid, null, null, null, null);
         }
 
         public User(Long id, @NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, @Nullable LocalDate birthday, @NonNull String uuid) {
-                this(id, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, birthday, uuid, null, null, null);
+                this(id, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, birthday, uuid, null, null, null, null);
         }
 
         public User(@NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, @NonNull String uuid) {
-                this(null, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, null, uuid, null, null, null);
+                this(null, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, null, uuid, null, null, null, null);
         }
 
         public User(Long id, @NonNull String username, @NonNull String password, @NonNull String firstname, @NonNull String lastname, LocalDate dateCreated, Boolean enabled, Boolean accountExpired, Boolean accountLocked, @NonNull String uuid) {
-                this(id, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, null, uuid, null, null, null);
+                this(id, username, password, firstname, lastname, dateCreated, enabled, accountExpired, accountLocked, null, uuid, null, null, null, null);
         }
 }
