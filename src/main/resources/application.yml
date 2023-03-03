@@ -17,6 +17,14 @@ micronaut:
           secret:
             generator:
               secret: ${JWT_GENERATOR_SIGNATURE_SECRET}
+        generator:
+          refresh-token:
+            secret: ${JWT_REFRESH_SIGNATURE_SECRET}
+    endpoints:
+      oauth:
+        ## micronaut-security: security-jwt TokenRefreshRequest dto missing constructor,
+        ## creating own controller: fixed in 4.0.0
+        enabled: false
 ---
 r2dbc:
   datasources:

@@ -168,7 +168,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public Mono<?> resetPassword(User user, ResetPasswordCmd cmd) {
+    public Mono<PasswordHistory> resetPassword(User user, ResetPasswordCmd cmd) {
 
         if(!cmd.updated().equals(cmd.confirm())){
             log.error("Password reset attempted where passwords do not match for user {}", user.username());
@@ -187,18 +187,16 @@ public class UserServiceImpl implements UserService{
         }
 
         // complexity checked by dto
-        return passwordHistoryRepository.findByUserOrderByUpdatedDesc(user)
+        return passwordHistoryRepository.findByUser(user)
                         .collectList()
                         .map(passwordHistories -> {
-                            if (passwordHistories.size() > 12) {
-                                passwordHistories = passwordHistories.subList(0, 11);
-                            }
                             return passwordHistories
                                     .stream()
                                     .anyMatch(passwordHistory -> passwordEncoderService.matches(cmd.updated(), passwordHistory.password()));
                         })
                         .flatMap(exists -> {
                             if (exists) {
+                                log.warn("Password reset for user {} attempted to use previous password.", user.username());
                                 return Mono.error(new HttpStatusException(HttpStatus.BAD_REQUEST, "New password cannot match any of the previous 12 iterations."));
                             }
                             return userRepository.update(new User(
