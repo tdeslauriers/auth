@@ -1,14 +1,7 @@
 micronaut:
   application:
     name: auth
-  ssl:
-    enabled: false
-    build-self-signed: false
-  http:
-    client:
-      ssl:
-        enabled: false
-        build-self-signed: false
+
 datasources:
   default:
     url: jdbc:tc:mysql:8:///db

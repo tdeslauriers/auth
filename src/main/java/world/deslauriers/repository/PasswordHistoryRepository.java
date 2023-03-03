@@ -12,5 +12,5 @@ import java.util.List;
 @R2dbcRepository(dialect = Dialect.MYSQL)
 public interface PasswordHistoryRepository extends ReactorCrudRepository<PasswordHistory, Long> {
 
-    Flux<PasswordHistory> findByUserOrderByUpdatedDesc(User user);
+    Flux<PasswordHistory> findByUser(User user);
 }

@@ -19,5 +19,5 @@ public interface UserService {
     Mono<ProfileDto> getProfile(String username);
     Mono<ProfileDto> getProfileByUuid(String uuid);
     Mono<User> updateUser(User user, ProfileDto updatedProfile);
-    Mono<?> resetPassword(User user, ResetPasswordCmd cmd);
+    Mono<PasswordHistory> resetPassword(User user, ResetPasswordCmd cmd);
 }
