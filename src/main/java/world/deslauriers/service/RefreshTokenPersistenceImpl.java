@@ -6,6 +6,8 @@ import io.micronaut.security.token.event.RefreshTokenGeneratedEvent;
 import io.micronaut.security.token.refresh.RefreshTokenPersistence;
 import jakarta.inject.Singleton;
 import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
@@ -14,12 +16,15 @@ import world.deslauriers.model.database.User;
 import world.deslauriers.repository.RefreshTokenRepository;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 
 import static io.micronaut.security.errors.IssuingAnAccessTokenErrorCode.INVALID_GRANT;
 
 @Singleton
 public class RefreshTokenPersistenceImpl implements RefreshTokenPersistence {
+
+    private static final Logger log = LoggerFactory.getLogger(RefreshTokenPersistenceImpl.class);
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserService userService;
@@ -51,7 +56,12 @@ public class RefreshTokenPersistenceImpl implements RefreshTokenPersistence {
                     }))
                     .subscribe(refresh -> {
                         if (refresh.revoked()){
+                            log.error("{} attempted to use revoked refresh token", refresh.username());
                             emitter.error(new OauthErrorResponseException(INVALID_GRANT, "Refresh token revoked", null));
+                        } else if (refresh.dateCreated().isBefore(Instant.now().minus(24, ChronoUnit.HOURS))) {
+                            refreshTokenRepository.delete(refresh).subscribe();
+                            log.error("{}'s refresh token expired.  Deleting from db.", refresh.username());
+                            emitter.error(new OauthErrorResponseException(INVALID_GRANT, "Refresh token expired", null));
                         } else {
                             userService.getUserByUsername(refresh.username())
                                     .subscribe(u -> {
