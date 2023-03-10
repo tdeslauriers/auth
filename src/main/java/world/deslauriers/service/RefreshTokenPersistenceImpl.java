@@ -51,6 +51,7 @@ public class RefreshTokenPersistenceImpl implements RefreshTokenPersistence {
         return Flux.create(emitter -> {
             refreshTokenRepository.findByRefreshToken(refreshToken)
                     .switchIfEmpty(Mono.defer(() -> {
+                        log.error("Refresh token not found.");
                         emitter.error(new OauthErrorResponseException(INVALID_GRANT, "Refresh token not found", null));
                         return Mono.empty();
                     }))
