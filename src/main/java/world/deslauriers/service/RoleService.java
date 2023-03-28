@@ -22,4 +22,6 @@ public interface RoleService {
     Mono<Role> save(RoleDto cmd);
 
     void resolveRoles(HashSet<Role> roles, User user);
+
+    Mono<Void> deleteRole(long id);
 }

@@ -69,4 +69,24 @@ public class RoleServiceImpl implements RoleService {
         });
 
     }
+
+    @Override
+    public Mono<Void> deleteRole(long id) {
+
+        return userRoleRepository.findByRoleId(id)
+                .flatMap(userRole -> {
+                    log.info("Removing xref: {} (role {}: {} from user: {}: {}).",
+                            userRole.id(),
+                            userRole.role().id(),
+                            userRole.role().role(),
+                            userRole.user().id(),
+                            userRole.user().username());
+                    return userRoleRepository.delete(userRole);
+                })
+                .then(Mono.defer(() -> {
+                    log.info("Deleting role id: {}", id);
+                    return roleRepository.deleteById(id);
+                }))
+                .then();
+    }
 }

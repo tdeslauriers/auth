@@ -2,6 +2,7 @@ package world.deslauriers.controller;
 
 import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.*;
 import io.micronaut.security.annotation.Secured;
 import org.slf4j.Logger;
@@ -51,6 +52,12 @@ public class RoleController {
             .map(r -> HttpResponse
                     .created(r)
                     .headers(headers -> headers.location(location(r.id()))));
+    }
+
+    @Delete("/{id}")
+    @Status(HttpStatus.NO_CONTENT)
+    Mono<Void> delete(long id){
+        return roleService.deleteRole(id).then();
     }
 
     protected URI location(Long id) {
