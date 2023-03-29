@@ -73,10 +73,6 @@ public class RoleServiceImpl implements RoleService {
     public Mono<Void> deleteRole(long id) {
 
         return userRoleRepository.findByRoleId(id)
-                .switchIfEmpty(Mono.defer(() -> {
-                    log.error("Attempting to delete role id the does not exist.");
-                    return Mono.empty();
-                }))
                 .flatMap(userRole -> {
                     log.info("Removing xref: {} (role {}: {} from user: {}: {}).",
                             userRole.id(),
@@ -89,6 +85,10 @@ public class RoleServiceImpl implements RoleService {
                 .then(Mono.defer(() -> {
                     log.info("Deleting role id: {}", id);
                     return roleRepository.deleteById(id);
+                }))
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.error("Attempting to delete role id the does not exist.");
+                    return Mono.empty();
                 }))
                 .then();
     }

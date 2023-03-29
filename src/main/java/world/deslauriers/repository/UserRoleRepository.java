@@ -14,6 +14,8 @@ public interface UserRoleRepository extends ReactorCrudRepository<UserRole, Long
     @Join(value = "role", type = Join.Type.LEFT_FETCH)
     Mono<UserRole> findByUserIdAndRoleId(Long userId, Long roleId);
 
+    @Join(value = "user", type = Join.Type.LEFT_FETCH)
+    @Join(value = "role", type = Join.Type.LEFT_FETCH)
     Flux<UserRole> findByRoleId(Long id);
 
 }
