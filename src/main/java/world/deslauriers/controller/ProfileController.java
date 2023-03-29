@@ -2,17 +2,13 @@ package world.deslauriers.controller;
 
 import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpResponse;
-import io.micronaut.http.HttpStatus;
-import io.micronaut.http.MutableHttpResponse;
 import io.micronaut.http.annotation.*;
 import io.micronaut.security.annotation.Secured;
-import io.micronaut.security.authentication.AuthenticationException;
 import io.micronaut.security.rules.SecurityRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import world.deslauriers.model.database.User;
 import world.deslauriers.model.dto.ProfileDto;
 import world.deslauriers.model.dto.RemoveUserRoleCmd;
 import world.deslauriers.model.dto.ResetPasswordCmd;
@@ -102,10 +98,14 @@ public class ProfileController {
                         .header(HttpHeaders.LOCATION, URI.create("/edit").getPath()));
     }
 
+    // Deletes xref, technically updating user record => Put
+    // request body needed.
     @Secured({"PROFILE_ADMIN"})
-    @Delete("/remove/userrole{?args*}")
-    Mono<HttpResponse<?>> removeUserRole(@Valid RemoveUserRoleCmd args){
-        return userService.removeUserRole(args)
-                .map(r -> HttpResponse.noContent());
+    @Put("/remove/userrole")
+    Mono<HttpResponse<?>> removeUserRole(@Body @Valid RemoveUserRoleCmd cmd){
+        return userService.removeUserRole(cmd)
+                .thenReturn(HttpResponse
+                        .noContent()
+                        .header(HttpHeaders.LOCATION, URI.create("/remove/userrole").getPath()));
     }
 }

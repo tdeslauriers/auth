@@ -249,21 +249,15 @@ public class UserServiceImpl implements UserService{
     @Override
     public Mono<Void> removeUserRole(RemoveUserRoleCmd cmd) {
 
-        return getUserById(cmd.userId())
-                .switchIfEmpty(Mono.defer(() -> {
-                    log.error("Attempt to remove userRole xref from user id that does not exist.");
-                    return Mono.empty();
-                }))
-                .zipWith(roleService.getById(cmd.roleId())
-                        .switchIfEmpty(Mono.defer(() -> {
-                            log.error("Attempt to remove userRole xref from role id that does not exist.");
-                            return Mono.empty();
-                        })))
-                .flatMap(objects -> userRoleRepository.findByUserAndRole(objects.getT1(), objects.getT2()))
+        return userRoleRepository.findByUserIdAndRoleId(cmd.userId(), cmd.roleId())
                 .flatMap(userRole -> {
-                    log.info("Deleting xref from user: {} and role: {}", userRole.user().username(), userRole.role().role());
+                    log.info("Deleting xref id: {} -- user: {} <--> role: {}", userRole.id(), userRole.user().username(), userRole.role().role());
                     return userRoleRepository.delete(userRole);
                 })
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.error("Attempted to delete xref that does not exist.");
+                    return Mono.empty();
+                }))
                 .then();
     }
 }

@@ -8,7 +8,6 @@ import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.Role;
 import world.deslauriers.model.database.User;
 import world.deslauriers.model.database.UserRole;
-import world.deslauriers.model.dto.RemoveUserRoleCmd;
 import world.deslauriers.model.dto.RoleDto;
 import world.deslauriers.repository.RoleRepository;
 import world.deslauriers.repository.UserRoleRepository;
