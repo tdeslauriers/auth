@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.Role;
 import world.deslauriers.model.database.User;
 import world.deslauriers.model.database.UserRole;
+import world.deslauriers.model.dto.RemoveUserRoleCmd;
 import world.deslauriers.model.dto.RoleDto;
 import world.deslauriers.repository.RoleRepository;
 import world.deslauriers.repository.UserRoleRepository;
@@ -21,10 +22,12 @@ public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
+    private final UserService userService;
 
-    public RoleServiceImpl(RoleRepository roleRepository, UserRoleRepository userRoleRepository) {
+    public RoleServiceImpl(RoleRepository roleRepository, UserRoleRepository userRoleRepository, UserService userService) {
         this.roleRepository = roleRepository;
         this.userRoleRepository = userRoleRepository;
+        this.userService = userService;
     }
 
     @Override
@@ -67,13 +70,16 @@ public class RoleServiceImpl implements RoleService {
                                 userRole.id(), userRole.user().username(), userRole.role().title()));
             }
         });
-
     }
 
     @Override
     public Mono<Void> deleteRole(long id) {
 
         return userRoleRepository.findByRoleId(id)
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.error("Attempting to delete role id the does not exist.");
+                    return Mono.empty();
+                }))
                 .flatMap(userRole -> {
                     log.info("Removing xref: {} (role {}: {} from user: {}: {}).",
                             userRole.id(),
@@ -87,6 +93,27 @@ public class RoleServiceImpl implements RoleService {
                     log.info("Deleting role id: {}", id);
                     return roleRepository.deleteById(id);
                 }))
+                .then();
+    }
+
+    @Override
+    public Mono<Void> removeUserRole(RemoveUserRoleCmd cmd) {
+
+        return userService.getUserById(cmd.userId())
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.error("Attempt to remove userRole xref from user id that does not exist.");
+                    return Mono.empty();
+                }))
+                .zipWith(roleRepository.findById(cmd.roleId())
+                        .switchIfEmpty(Mono.defer(() -> {
+                            log.error("Attempt to remove userRole xref from role id that does not exist.");
+                            return Mono.empty();
+                        })))
+                .flatMap(objects -> userRoleRepository.findByUserAndRole(objects.getT1(), objects.getT2()))
+                .flatMap(userRole -> {
+                    log.info("Deleting xref from user: {} and role: {}", userRole.user().username(), userRole.role().role());
+                    return userRoleRepository.delete(userRole);
+                })
                 .then();
     }
 }

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.Role;
+import world.deslauriers.model.dto.RemoveUserRoleCmd;
 import world.deslauriers.model.dto.RoleDto;
 import world.deslauriers.service.RoleService;
 
@@ -58,6 +59,13 @@ public class RoleController {
     @Status(HttpStatus.NO_CONTENT)
     Mono<Void> delete(long id){
         return roleService.deleteRole(id).then();
+    }
+
+    // deletes xref which is technically an update and need request body.
+    @Put("/remove/userrole")
+    Mono<HttpResponse<?>> removeUserRole(@Body @Valid RemoveUserRoleCmd cmd){
+        return roleService.removeUserRole(cmd)
+                .map(r -> HttpResponse.noContent());
     }
 
     protected URI location(Long id) {
