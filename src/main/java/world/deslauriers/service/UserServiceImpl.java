@@ -12,6 +12,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import world.deslauriers.model.database.*;
 import world.deslauriers.model.dto.ProfileDto;
+import world.deslauriers.model.dto.RemoveUserRoleCmd;
 import world.deslauriers.model.dto.ResetPasswordCmd;
 import world.deslauriers.model.registration.RegistrationDto;
 import world.deslauriers.model.registration.RegistrationResponseDto;
@@ -245,5 +246,25 @@ public class UserServiceImpl implements UserService{
                 phones);
     }
 
+    @Override
+    public Mono<Void> removeUserRole(RemoveUserRoleCmd cmd) {
+
+        return getUserById(cmd.userId())
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.error("Attempt to remove userRole xref from user id that does not exist.");
+                    return Mono.empty();
+                }))
+                .zipWith(roleService.getById(cmd.roleId())
+                        .switchIfEmpty(Mono.defer(() -> {
+                            log.error("Attempt to remove userRole xref from role id that does not exist.");
+                            return Mono.empty();
+                        })))
+                .flatMap(objects -> userRoleRepository.findByUserAndRole(objects.getT1(), objects.getT2()))
+                .flatMap(userRole -> {
+                    log.info("Deleting xref from user: {} and role: {}", userRole.user().username(), userRole.role().role());
+                    return userRoleRepository.delete(userRole);
+                })
+                .then();
+    }
 }
 

@@ -7,8 +7,6 @@ import reactor.core.publisher.Flux;
 import world.deslauriers.model.database.PasswordHistory;
 import world.deslauriers.model.database.User;
 
-import java.util.List;
-
 @R2dbcRepository(dialect = Dialect.MYSQL)
 public interface PasswordHistoryRepository extends ReactorCrudRepository<PasswordHistory, Long> {
 

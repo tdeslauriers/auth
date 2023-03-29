@@ -61,13 +61,6 @@ public class RoleController {
         return roleService.deleteRole(id).then();
     }
 
-    // deletes xref which is technically an update and need request body.
-    @Put("/remove/userrole")
-    Mono<HttpResponse<?>> removeUserRole(@Body @Valid RemoveUserRoleCmd cmd){
-        return roleService.removeUserRole(cmd)
-                .map(r -> HttpResponse.noContent());
-    }
-
     protected URI location(Long id) {
         return URI.create("/roles/" + id);
     }
