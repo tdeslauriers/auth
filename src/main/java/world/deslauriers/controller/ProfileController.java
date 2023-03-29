@@ -102,6 +102,7 @@ public class ProfileController {
                         .header(HttpHeaders.LOCATION, URI.create("/edit").getPath()));
     }
 
+    @Secured({"PROFILE_ADMIN"})
     @Delete("/remove/userrole{?args*}")
     Mono<HttpResponse<?>> removeUserRole(@Valid RemoveUserRoleCmd args){
         return userService.removeUserRole(args)
