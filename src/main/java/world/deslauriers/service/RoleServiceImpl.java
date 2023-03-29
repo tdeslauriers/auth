@@ -22,12 +22,10 @@ public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
-    private final UserService userService;
 
-    public RoleServiceImpl(RoleRepository roleRepository, UserRoleRepository userRoleRepository, UserService userService) {
+    public RoleServiceImpl(RoleRepository roleRepository, UserRoleRepository userRoleRepository) {
         this.roleRepository = roleRepository;
         this.userRoleRepository = userRoleRepository;
-        this.userService = userService;
     }
 
     @Override
