@@ -67,11 +67,10 @@ public class ProfileController {
     Mono<HttpResponse<?>> resetPassword(@Body @Valid ResetPasswordCmd cmd, Principal principal){
 
         // can only reset your own pw.
-        // complexity standards will be executed by @Valid
+        // pw complexity standards will be executed by @Valid
         return userService.getUserByUsername(principal.getName())
                 .flatMap(user -> userService.resetPassword(user, cmd))  // exceptions handled/thrown in service.
                 .thenReturn(HttpResponse.noContent());
-
     }
 
     // admin
