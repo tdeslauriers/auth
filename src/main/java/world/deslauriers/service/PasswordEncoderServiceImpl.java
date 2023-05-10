@@ -2,13 +2,12 @@ package world.deslauriers.service;
 
 import io.micronaut.core.annotation.NonNull;
 import jakarta.inject.Singleton;
-;
 
 import javax.validation.constraints.NotBlank;
 import java.security.SecureRandom;
 
 @Singleton
-public class PassWordEncoderServiceImpl implements PasswordEncoderService {
+public class PasswordEncoderServiceImpl implements PasswordEncoderService {
 
     // spring security pw encoder
     PasswordEncoder delegate = new BCryptPasswordEncoderImpl(

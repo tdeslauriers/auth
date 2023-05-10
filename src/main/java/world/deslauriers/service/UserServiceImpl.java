@@ -255,7 +255,7 @@ public class UserServiceImpl implements UserService{
                     return userRoleRepository.delete(userRole);
                 })
                 .switchIfEmpty(Mono.defer(() -> {
-                    log.error("Attempted to delete xref that does not exist.");
+                    log.error("Attempted to delete xref UserRole that does not exist.");
                     return Mono.empty();
                 }))
                 .then();
