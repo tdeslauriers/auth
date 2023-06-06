@@ -260,5 +260,10 @@ public class UserServiceImpl implements UserService{
                 }))
                 .then();
     }
+
+    @Override
+    public Mono<User> saveUser(User user) {
+        return userRepository.save(user);
+    }
 }
 

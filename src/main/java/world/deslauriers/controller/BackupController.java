@@ -3,14 +3,13 @@ package world.deslauriers.controller;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.security.annotation.Secured;
-import io.micronaut.security.rules.SecurityRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import world.deslauriers.model.database.User;
 import world.deslauriers.service.UserService;
 
-@Secured(SecurityRule.IS_AUTHENTICATED)
+@Secured({"COLD_STORAGE"})
 @Controller("/backup")
 public class BackupController {
 
@@ -22,7 +21,6 @@ public class BackupController {
         this.userService = userService;
     }
 
-    @Secured({"COLD_STORAGE"})
     @Get
     public Flux<User> backup(){
 

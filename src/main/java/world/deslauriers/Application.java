@@ -4,7 +4,6 @@ import io.dekorate.docker.annotation.DockerBuild;
 import io.dekorate.kubernetes.annotation.*;
 import io.micronaut.runtime.Micronaut;
 
-
 @KubernetesApplication(
         name = "auth",
         serviceType = ServiceType.ClusterIP,
