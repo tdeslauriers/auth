@@ -25,4 +25,5 @@ public interface RoleService {
 
     Mono<Void> deleteRole(long id);
 
+    Mono<Role> restore(Role role);
 }

@@ -1,7 +1,6 @@
 package world.deslauriers.model.database;
 
 import io.micronaut.core.annotation.Nullable;
-import io.micronaut.data.annotation.GeneratedValue;
 import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.MappedEntity;
 import io.micronaut.data.annotation.Relation;
@@ -17,7 +16,7 @@ import static io.micronaut.data.annotation.Relation.Kind;
 @Serdeable
 @MappedEntity
 public record Role(
-        @Id @GeneratedValue Long id,
+        @Id Long id,
         @NotNull @NotBlank @Size(min = 2, max = 32) String role,
         @NotNull @NotBlank @Size(min = 2, max = 32) String title,
         @NotNull @NotBlank @Size(min = 2, max = 64) String description,

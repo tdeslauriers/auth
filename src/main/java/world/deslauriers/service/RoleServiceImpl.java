@@ -92,4 +92,9 @@ public class RoleServiceImpl implements RoleService {
                 }))
                 .then();
     }
+
+    @Override
+    public Mono<Role> restore(Role role) {
+        return roleRepository.save(role);
+    }
 }

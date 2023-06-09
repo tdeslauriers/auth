@@ -2,7 +2,6 @@ package world.deslauriers.model.database;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.micronaut.core.annotation.Nullable;
-import io.micronaut.data.annotation.GeneratedValue;
 import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.MappedEntity;
 import io.micronaut.data.annotation.Relation;
@@ -13,7 +12,7 @@ import static io.micronaut.data.annotation.Relation.Kind;
 @Serdeable
 @MappedEntity
 public record UserRole(
-        @Id @GeneratedValue Long id,
+        @Id Long id,
 
         @JsonIgnore
         @Nullable

@@ -22,5 +22,6 @@ public interface UserService {
     Mono<User> updateUser(User user, ProfileDto updatedProfile);
     Mono<PasswordHistory> resetPassword(User user, ResetPasswordCmd cmd);
     Mono<Void> removeUserRole(RemoveUserRoleCmd cmd);
-    Mono<User> saveUser(User user);
+
+    Mono<User> restore(User user);
 }
