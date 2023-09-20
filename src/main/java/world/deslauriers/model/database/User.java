@@ -22,12 +22,12 @@ import static io.micronaut.data.annotation.Relation.Kind;
 @Serdeable
 @MappedEntity
 public record User(
-        @Id Long id,
+        @Id @GeneratedValue Long id,
         @NonNull @NotBlank @Email @Size(max = 255) String username,
         @NonNull @NotBlank @PasswordComplexity String password,
         @NonNull @NotBlank @LettersOnly @Size(min = 1, max = 32)String firstname,
         @NonNull @NotBlank @LettersOnly @Size(min = 1, max = 32)String lastname,
-        @JsonFormat(pattern="yyyy-MM-dd") @NotNull LocalDate dateCreated,
+        @JsonFormat(pattern="yyyy-MM-dd") @DateCreated @NotNull LocalDate dateCreated,
         @NotNull Boolean enabled,
         @NotNull Boolean accountExpired,
         @NotNull Boolean accountLocked,
